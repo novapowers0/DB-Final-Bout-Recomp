@@ -1,0 +1,47 @@
+{
+  "format_version": 1,
+  "game": {
+    "name": "DBFinalBout",
+    "id": "SLUS-00493",
+    "boot_exe": "SLUS_004.93"
+  },
+  "marketing": {
+    "description": "Native PC port",
+    "publisher": "Bandai",
+    "year": "1997",
+    "region": "USA",
+    "players": 2
+  },
+  "rom_identity": {
+    "cue_name": "Dragon Ball GT - Final Bout (USA).cue",
+    "bin_name": "Dragon Ball GT - Final Bout (USA).bin",
+    "track_counts": [
+      1
+    ],
+    "require_cue": true,
+    "data_track": {
+      "size": 158811744,
+      "md5": "2f869f926514278b72ffbd671e69b9f7",
+      "sha1": "8a2373f133788256cba64a1a0ba9fbb4b4667f71"
+    },
+    "disc_fp": "51195bfbf616d0713aadd890761af2eb489f8f2629e8a06d64f7d839df7722ae"
+  },
+  "exe": {
+    "load_address": "0x80010000",
+    "entry_pc": "0x80010B98",
+    "text_size": "0x0002E000",
+    "stack_base": "0x801FFFF0"
+  },
+  "seeds": {
+    "count": 298,
+    "source": "boot_exe_jal"
+  },
+  "warnings": [
+    "cue has only 1 TRACK \u2014 Track-01-only dumps fail multi-track netplay/catalog gates; prefer a full Redump cue."
+  ],
+  "notes": [
+    "entry_pc/load_address/text_size/stack_base taken from PS-X EXE header.",
+    "seeds are first-pass boot-EXE JAL targets (+ entry); expect to grow as overlays / runtime paths are discovered.",
+    "required_disc_fp is psxrecomp-toc-v1 (matches runtime DiscIdentity)."
+  ]
+}

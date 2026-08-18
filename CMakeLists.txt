@@ -8,14 +8,30 @@ set(PSXRECOMP_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/psxrecomp" CACHE PATH
 # Scaffold prompts / flags fill these. Without recomp-ui, PSX_RECOMP_UI is OFF.
 # Setup-host CI requires WIZARD_CMAKE_BLOCK / ENABLE_SETUP_WIZARD (FORCE_SETUP_HOST
 # alone does not open first-run / Generate & rebuild).
-﻿# recomp-ui submodule present (PSX_RECOMP_UI defaults ON).
-﻿# Full netplay UI -- enable after adding recomp-ui + testing:
+# recomp-ui submodule present (PSX_RECOMP_UI defaults ON).
+# Full netplay UI -- enable after adding recomp-ui + testing:
 # if(EXISTS "${PSXRECOMP_ROOT}/lib/recomp-net/CMakeLists.txt")
 #     set(PSX_NETPLAY ON CACHE BOOL "..." FORCE)
 # endif()
-﻿set(PSX_SETUP_WIZARD ON CACHE BOOL
+set(PSX_SETUP_WIZARD ON CACHE BOOL
     "Advertise first-run setup wizard + Generate & rebuild in recomp-ui" FORCE)
+# libchdr from a project-local copy when the network fetch is unavailable
+# (GitHub rate-limits; keeps Generate & rebuild deterministic offline).
+if(NOT FETCHCONTENT_SOURCE_DIR_PSX_LIBCHDR AND
+   EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/libchdr/CMakeLists.txt")
+    set(FETCHCONTENT_SOURCE_DIR_PSX_LIBCHDR
+        "${CMAKE_CURRENT_SOURCE_DIR}/deps/libchdr" CACHE PATH
+        "Use project-local libchdr (offline)" FORCE)
+endif()
 include("${PSXRECOMP_ROOT}/runtime/runtime.cmake")
+
+# PGXP precision-shadowing variant (full-coverage <exe>_pgxp build; the base
+# exe's PGXP hook macros preprocess away, so only this variant feeds the whole
+# recompiled game into the value-propagation engine — enabling the
+# psx.enhancement.pgxp mod on the base exe only corrects a fraction of
+# vertices and makes polygons flicker).
+set(PSX_PGXP_VARIANT ON CACHE BOOL
+    "Also build the <exe>_pgxp PGXP precision-shadowing variant" FORCE)
 
 psxrecomp_add_game_runtime(psx-runtime
     # ENABLE_NETPLAY_IF_PRESENT
@@ -24,11 +40,11 @@ psxrecomp_add_game_runtime(psx-runtime
     WINDOW_TITLE "DBFinalBout Recompiled"
     DEFAULT_GAME_CONFIG_PATH "game.toml"
     MAX_PLAYERS 2
-﻿    # LAUNCHER_BOXART "${CMAKE_CURRENT_SOURCE_DIR}/launcher_assets/img/boxart.tga"
-﻿    APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/assets/psxrecomp.ico"
-    GEN_MARKER "generated/SLUS_01234_dispatch.c"
-    GEN_FULL_GLOB "generated/SLUS_01234_full_*.c"
-﻿    CODEGEN_SETUP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/codegen_setup.c"
+    # LAUNCHER_BOXART "${CMAKE_CURRENT_SOURCE_DIR}/launcher_assets/img/boxart.tga"
+    APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/assets/psxrecomp.ico"
+    GEN_MARKER "generated/SLUS_004.93_dispatch.c"
+    GEN_FULL_GLOB "generated/SLUS_004.93_full_*.c"
+    CODEGEN_SETUP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/codegen_setup.c"
 )
 
 # Stage runtime configs next to the exe for direct build/ launches. Only copy

@@ -1,35 +1,71 @@
-# Minimal game.toml stub for the New Project Layout.
-# With setup_project --disc <cue>, probe_disc.py overwrites this with
-# serial / EXE header / Track 01 digests / TOC fp / [netplay] gates, and writes
-# seeds/ghidra_funcs.txt (boot-EXE JAL scan).
-# Without --disc, fill by hand (or re-run probe_disc.py later).
-# See psxrecomp/docs/GAME_PROJECT_SETUP.md and docs/config_schema.md.
+# Autofilled by tools/new_project_layout/probe_disc.py from your legal dump.
+# Review before shipping. Runtime quirks / overlay seeds still need hand work.
 
 [game]
 name = "DBFinalBout"
-# id = "SLUS-XXXXX"
+id = "SLUS-00493"
 players = 2
-# exe = "disc/SLUS_01234"
-# disc = "disc/game.cue"
-# load_address = "0x80010000"
-# entry_pc = "0x800XXXXX"
-# text_size = "0x00000000"
-# stack_base = "0x801FFFF0"
+exe = "disc/SLUS_004.93"
+disc = "disc/Dragon Ball GT - Final Bout (USA).cue"
+load_address = "0x80010000"
+entry_pc = "0x80010B98"
+text_size = "0x0002E000"
+stack_base = "0x801FFFF0"
+
+# Digests are for data Track 01 (first BINARY FILE / TRACK 01).
+[prepare_disc]
+out_dir = "disc"
+bin_name = "Dragon Ball GT - Final Bout (USA).bin"
+cue_name = "Dragon Ball GT - Final Bout (USA).cue"
+boot_exe = "SLUS_004.93"
+known_sizes = [158811744]
+known_md5 = [
+  "2f869f926514278b72ffbd671e69b9f7",
+]
+known_sha1 = [
+  "8a2373f133788256cba64a1a0ba9fbb4b4667f71",
+]
 
 [recompiler]
 seeds = "seeds/ghidra_funcs.txt"
 out_dir = "generated"
 strict = true
 
-# Optional identity hashes for Generate / netplay dump checks:
-# [prepare_disc]
-# out_dir = "disc"
-# boot_exe = "SLUS_01234"
-# known_sizes = [...]
-# known_md5 = [...]
-# known_sha1 = [...]
+[runtime]
+window_title = "DBFinalBout Recompiled"
+memcard_dir = "saves"
 
-# [netplay]
-# require_cue = true
-# required_tracks = 0
-# required_disc_fp = "…"
+[video]
+renderer = "opengl"
+aspect_ratio = "4:3"
+
+# True-widescreen codegen sites. The psx.enhancement.widescreen mod moves the
+# display aspect off 4:3; auto_screen_x then widens every GTE screen-extent
+# cull that matches the render-funnel signature so the fight reveals the extra
+# horizontal world (identity at 4:3). auto_backdrop preloads scrolling
+# backdrop column windows for the wider frame. gte_game_mode arms the generic
+# 3D-activity detector that keeps menus/2D from being stretched.
+[widescreen]
+gte_game_mode = true
+# squash=false: the GTE X-squash corrupts this game (its gameplay/rendering
+# logic reads projected SXY for actor culling and UI layout, so compressed
+# coords drop character polygons and break menus). With squash off the guest
+# stays 100% vanilla and the 4:3 frame is presented stretched to the wide
+# aspect — no FOV widening, zero guest corruption.
+squash = false
+native_wide = false
+
+[widescreen.cull]
+auto_screen_x = true
+auto_backdrop = true
+
+[controller]
+default_mode = "digital"
+lock_mode = true
+
+# Online mount gate: digests + track count + optional TOC fingerprint
+# (see docs/NETPLAY.md).
+[netplay]
+require_cue = true
+required_tracks = 1
+required_disc_fp = "51195bfbf616d0713aadd890761af2eb489f8f2629e8a06d64f7d839df7722ae"

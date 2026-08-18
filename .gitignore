@@ -73,3 +73,7 @@ starvation_dump.jsonl
 /*.png
 !/catalog_identity.json
 !/disc_probe.json
+
+# Local build toolchain / vendored deps (never commit)
+/toolchain/
+/deps/
