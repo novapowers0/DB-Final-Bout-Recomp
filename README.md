@@ -5,7 +5,7 @@ Copyright (c) 2026 **NovaPowers**. Released under the MIT License (see `LICENSE`
 Static recompilation of **Dragon Ball GT: Final Bout** (USA, SLUS-00493) for the
 Sony PlayStation, built on [psxrecomp](https://github.com/mstan/psxrecomp) and
 [recomp-ui](https://github.com/mstan/recomp-ui), targeting a native Windows PC
-port.
+port. It is in a fairly early stage of development.
 
 | | |
 |---|---|
