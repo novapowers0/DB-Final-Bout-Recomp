@@ -34,10 +34,43 @@ strict = true
 [runtime]
 window_title = "DBFinalBout Recompiled"
 memcard_dir = "saves"
+# Debug server (TCP 4370) for live analysis: probe_ram.py / ram_dump.py /
+# stall_report.py connect here. Keep it ON while testing.
+debug_port = 4370
+# Capture runtime-loaded overlays (STEP*.BIN: menu/battle code) so the dev box
+# can recompile them native via tools/compile_overlays.py. The fight render
+# funnel (screen_extent culls 0x200/0x1E0) lives in the STEP40 overlay — until
+# it's captured and recompiled, widescreen culls can't widen that code.
+overlay_cache = true
+# NOTE (2026-08-18): the cross-fragment load-delay codegen bug that failed 8
+# menu fragments (psx_ldd_* undeclared) and produced a garbage-jump crash
+# (0xD7FFFFAC) when recompiled is FIXED (code_generator.cpp: defer_load now
+# declares the psx_ldd_<addr> temp at the outer load-delay block scope instead
+# of inside the PGXP scope block). Overlays recompile clean (10 shards OK; the
+# 2 audit failures are data-as-code false positives at 0x80002030+).
+# Session history: append-only overlay_captures.addendum.jsonl + the durable
+# overlay_captures.json manifest next to the exe. Every overlay DMA'd into RAM
+# during play is recorded with its load address + CRC, so the session can be
+# analyzed offline (tools/compile_overlays.py + ram_dump.py).
+overlay_capture_history = true
+# Persist capture bookkeeping into the project (relative to project root) so
+# analysis scripts find it without guessing the exe dir.
+overlay_capture_persist_dir = "build-release"
 
 [video]
-renderer = "opengl"
+# Final Bout uses several borderline PS1 texture-window and polygon-edge cases.
+# Keep the faithful software path as the release default; the GL path remains
+# available for other profiles but previously exposed missing face textures and
+# clipped lower-leg polygons here.
+renderer = "software"
+offer_vulkan = true
 aspect_ratio = "4:3"
+supersampling = 1
+antialiasing = false
+texture_filtering = "nearest"
+geometry_correction = false
+perspective_texturing = false
+pgxp_cpu_mode = false
 
 # True-widescreen codegen sites. The psx.enhancement.widescreen mod moves the
 # display aspect off 4:3; auto_screen_x then widens every GTE screen-extent
@@ -51,17 +84,146 @@ gte_game_mode = true
 # logic reads projected SXY for actor culling and UI layout, so compressed
 # coords drop character polygons and break menus). With squash off the guest
 # stays 100% vanilla and the 4:3 frame is presented stretched to the wide
-# aspect — no FOV widening, zero guest corruption.
+# aspect — no FOV widening, zero guest corruption. NOTE: this means Final
+# Bout's widescreen is STRETCH-ONLY (like BR2 with squash, but the X-squash
+# is off). True extra-FOV would require squash=true, which is unsafe here.
 squash = false
 native_wide = false
+# Presentation offers (same framework keys as Bloody Roar II). offer=true
+# exposes the 16:9 choice in the launcher; adaptive_view lets the live window
+# shape drive the aspect (clamped to the widest offered = 16:9). Ultrawide
+# 21:9 is NOT offered: stretch is safe, but the auto_screen_x cull widening
+# has not been validated at 21:9 for this funnel.
+offer = true
+adaptive_view = true
+# precise_nclip: fighting game with lots of geometry near the frame edges —
+# the same class as Bloody Roar II, where the widened NCLIP clamp avoids
+# wide-edge clipping artifacts on the extended FOV (verified in BR2).
+# Exact NCLIP consumes enhancement provenance and can reject the same edge
+# triangles whose SXY values this title reads back for its own culling.
+precise_nclip = false
 
 [widescreen.cull]
-auto_screen_x = true
-auto_backdrop = true
+auto_screen_x = false
+# Real screen-extent signature of Final Bout (SLUS_004.93): the fight render
+# funnel lives in the STEP40 overlay and uses `slti ...,0x200` (X=512) paired
+# with `slti ...,0x1E0` (Y=480) — NOT the Tomba defaults 0x140/0xE0. These
+# match the exact screen_w_imms/screen_h_imms of Bloody Roar II (SCUS-94424 /
+# SLES-01722), which shares the same Eighting fighting-game funnel.
+# NOTE: STEP40 overlay must be captured (overlay_cache=true) and recompiled
+# (compile_overlays.py) for the widened culls to take effect in fight code.
+screen_w_imms = ["0x200"]
+screen_h_imms = ["0x1E0"]
+auto_backdrop = false
 
 [controller]
 default_mode = "digital"
 lock_mode = true
+# Final Bout's battle/card transaction clears TX_EN between bytes while the
+# selected SIO device is still active. Keep the compatibility scoped to this
+# title; the global SIO model remains hardware-gated by default.
+sio_no_tx_gate = true
+
+# STEP40 battle overlay (complete). The runtime capture records dispatch/
+# executed PCs, but the STEP40 battle overlay's dispatch PCs are interior
+# points (not function starts), so the classifier would reject the region as
+# "data-only" and leave the fight interpreted -> spin_freeze. These are the
+# REAL function starts found by scanning the full STEP40 member (2026-08-21):
+# the member maps to RAM base 0x80060000 (file offset 0x22060, size 0x12354),
+# covering the whole ~60KB fight code. The list = the 35 proven function
+# starts (prologue `addiu sp,sp,-N` in executed_pcs) + every loose prologue
+# (`addiu sp,X,-N`) that also appears in executed_pcs across the captured
+# battles. Declaring them lets classify_overlay_seeds promote them to roots
+# and compile the battle overlay natively.
+[[overlays]]
+load_addr = "0x80060000"
+function_entry_pcs = [
+  "0x8006026C", "0x8006053C", "0x80060BA4", "0x80060DC8", "0x80061120",
+  "0x80061214", "0x80061830", "0x80061A08", "0x80061ABC", "0x80061B30",
+  "0x800620FC", "0x80065F1C", "0x80065FCC", "0x8006639C", "0x80066A6C",
+  "0x80066FBC", "0x80067148", "0x80067288", "0x80067290", "0x800677C4",
+  "0x800678D0", "0x800680A4", "0x8006829C", "0x80068314", "0x80068D40",
+  "0x80068D6C", "0x80068E18", "0x80069228", "0x800693C0", "0x800693CC",
+  "0x800693F4", "0x80069404", "0x80069C4C", "0x80069C90", "0x80069E6C",
+  "0x80069FA0", "0x8006A3A4", "0x8006A454", "0x8006A538", "0x8006AC08",
+  "0x8006AC14", "0x8006B01C", "0x8006B028", "0x8006B0A0", "0x8006B2AC",
+  "0x8006B2B8", "0x8006B3EC", "0x8006B3F8", "0x8006B708", "0x8006B778",
+  "0x8006B784", "0x8006BD60", "0x8006BD6C", "0x8006BD74", "0x8006C0AC",
+  "0x8006C14C", "0x8006C220", "0x8006C274", "0x8006C330", "0x8006C470",
+  "0x8006C8E8", "0x8006C940", "0x8006C98C", "0x8006CA30", "0x8006CA38",
+  "0x8006CA70", "0x8006CA7C", "0x8006CB40", "0x8006CBD4", "0x8006CC70",
+  "0x8006CCBC", "0x8006CD4C", "0x8006CE4C", "0x8006D124", "0x8006D174",
+  "0x8006D180", "0x8006D460", "0x8006D46C", "0x8006D784", "0x8006DB0C",
+  "0x8006DF08", "0x8006DF14", "0x8006E100", "0x8006E108", "0x8006E2F8",
+  "0x8006E5FC", "0x8006E6C4", "0x8006E6D0", "0x8006EADC",
+]
+
+# STEP40 battle overlay at the 0x80068000-bucket variant (dirty-run recovery
+# can anchor at either page; both DLLs are compiled so whichever base the
+# runtime records, the battle dispatches native).
+[[overlays]]
+load_addr = "0x80068000"
+function_entry_pcs = [
+  "0x800680A4", "0x8006829C", "0x80068314", "0x80068D40", "0x80068D6C",
+  "0x80068E18", "0x80069228", "0x800693C0", "0x800693CC", "0x800693F4",
+  "0x80069404", "0x80069C4C", "0x80069C90", "0x80069E6C", "0x80069FA0",
+  "0x8006A3A4", "0x8006A454", "0x8006A538", "0x8006AC08", "0x8006AC14",
+  "0x8006B01C", "0x8006B028", "0x8006B0A0", "0x8006B2AC", "0x8006B2B8",
+  "0x8006B3EC", "0x8006B3F8", "0x8006B708", "0x8006B778", "0x8006B784",
+  "0x8006BD60", "0x8006BD6C", "0x8006BD74", "0x8006C0AC", "0x8006C14C",
+  "0x8006C220", "0x8006C274", "0x8006C330", "0x8006C470", "0x8006C8E8",
+  "0x8006C940", "0x8006C98C", "0x8006CA30", "0x8006CA38", "0x8006CA70",
+  "0x8006CA7C", "0x8006CB40", "0x8006CBD4", "0x8006CC70", "0x8006CCBC",
+  "0x8006CD4C", "0x8006CE4C", "0x8006D124", "0x8006D174", "0x8006D180",
+  "0x8006D460", "0x8006D46C", "0x8006D784", "0x8006DB0C", "0x8006DF08",
+  "0x8006DF14", "0x8006E100", "0x8006E108", "0x8006E2F8", "0x8006E5FC",
+  "0x8006E6C4", "0x8006E6D0", "0x8006EADC",
+]
+
+# Battle overlay variant captured at 0x8006A000 (12292 bytes, session 2026-08-29
+# on master). The runtime's dispatch entries landed on interior points, so the
+# classifier skipped it as data-only; these are the REAL prologues
+# (`addiu sp,sp,-N`) found by scanning the captured bytes. Base varies per
+# session (0x80060000/0x80068000/0x8006A000...), so a fresh capture at another
+# base needs its own [[overlays]] entry + recompile.
+[[overlays]]
+load_addr = "0x8006A000"
+function_entry_pcs = [
+  "0x8006A3A4", "0x8006A538", "0x8006AC14", "0x8006B0A0", "0x8006B2B8",
+  "0x8006B708", "0x8006B784", "0x8006BD74", "0x8006C14C", "0x8006C220",
+  "0x8006C280", "0x8006C470", "0x8006C678", "0x8006CA38", "0x8006CBD4",
+  "0x8006CEA8",
+]
+
+# Menu / VS / transition overlay 0x8003F000 (20484 bytes). Contains the
+# character-select / VS screen that displays the opponent portrait (CS_N*.TIM)
+# and the battle-loading transitions. Previously skipped as "data-only" (its
+# dispatch PCs are interior points, not function starts), leaving the VS /
+# load transitions interpreted -> opponent portrait missing + black screen on
+# the 2nd battle. Real prologue `addiu sp,sp,-N` boundaries found by scanning
+# captured bytes (2026-08-19).
+[[overlays]]
+load_addr = "0x8003F000"
+function_entry_pcs = [
+  "0x8003F7BC", "0x8003F938", "0x8003FCF0", "0x8003FE5C", "0x80041EF4",
+  "0x80041FB0", "0x8004201C", "0x8004205C", "0x800420FC", "0x80042160",
+  "0x800421E8", "0x80042234", "0x80042240", "0x800422BC", "0x800422C8",
+  "0x80042D04", "0x80043134", "0x80043290",
+]
+
+# Menu / VS overlay 0x80047000 (16388 bytes). Same class as above.
+[[overlays]]
+load_addr = "0x80047000"
+function_entry_pcs = [
+  "0x800479D4", "0x80047B98", "0x80049728", "0x8004AC20",
+]
+
+# Small menu region 0x80056000 with function boundaries.
+[[overlays]]
+load_addr = "0x80056000"
+function_entry_pcs = [
+  "0x800569DC", "0x80056E48",
+]
 
 # Online mount gate: digests + track count + optional TOC fingerprint
 # (see docs/NETPLAY.md).

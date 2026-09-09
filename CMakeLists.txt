@@ -9,10 +9,16 @@ set(PSXRECOMP_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/psxrecomp" CACHE PATH
 # Setup-host CI requires WIZARD_CMAKE_BLOCK / ENABLE_SETUP_WIZARD (FORCE_SETUP_HOST
 # alone does not open first-run / Generate & rebuild).
 # recomp-ui submodule present (PSX_RECOMP_UI defaults ON).
-# Full netplay UI -- enable after adding recomp-ui + testing:
-# if(EXISTS "${PSXRECOMP_ROOT}/lib/recomp-net/CMakeLists.txt")
-#     set(PSX_NETPLAY ON CACHE BOOL "..." FORCE)
-# endif()
+# Build the real netplay/lobby path for this two-player title. Runtime netplay
+# remains opt-in at launch; keeping the feature compiled makes it available to
+# the launcher without changing normal offline sessions.
+if(EXISTS "${PSXRECOMP_ROOT}/lib/recomp-net/CMakeLists.txt")
+    set(PSX_NETPLAY ON CACHE BOOL "Link recomp-net and lobby support" FORCE)
+endif()
+# Vulkan is an optional runtime choice. Software remains the game default and
+# is still the reference renderer for Final Bout.
+set(PSX_ENABLE_VULKAN ON CACHE BOOL
+    "Build the Vulkan renderer when the SDK is available" FORCE)
 set(PSX_SETUP_WIZARD ON CACHE BOOL
     "Advertise first-run setup wizard + Generate & rebuild in recomp-ui" FORCE)
 # libchdr from a project-local copy when the network fetch is unavailable
@@ -34,8 +40,8 @@ set(PSX_PGXP_VARIANT ON CACHE BOOL
     "Also build the <exe>_pgxp PGXP precision-shadowing variant" FORCE)
 
 psxrecomp_add_game_runtime(psx-runtime
-    # ENABLE_NETPLAY_IF_PRESENT
-    # NETPLAY_LOBBY_URL ws://netplay.retcomm.net:8765
+    ENABLE_NETPLAY_IF_PRESENT
+    NETPLAY_LOBBY_URL "ws://netplay.retcomm.net:8765"
     ENABLE_SETUP_WIZARD
     WINDOW_TITLE "DBFinalBout Recompiled"
     DEFAULT_GAME_CONFIG_PATH "game.toml"

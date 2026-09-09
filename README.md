@@ -39,16 +39,23 @@ Dragon Ball.
 
 ---
 
-## ⚠️ Status
+## Status: v0.1.0
 
-Both enhancements shipped in this repository are **WORK IN PROGRESS**:
+This is the first playable release. The current build has been exercised through
+four complete fights, including the transition that previously froze on the
+second fight.
+
+The release is conservative by design:
 
 - **Widescreen** (`psx.enhancement.widescreen`) — works in stretch-only mode.
-  Known issue: shadow/far-depth projection problems exist on the vanilla (4:3)
-  port and are not fixed by this mod.
-- **Custom Combat Engine** (`psx.enhancement.custom-combat`) — **NOT
-  RECOMMENDED FOR USE.** The guest bridge (animation IDs / fighter base) is
-  incomplete; do not enable it on a real fight.
+-  The current build offers 16:9/adaptive presentation while keeping guest
+  coordinates and experimental FOV/culling rewrites disabled. Some 2D menus
+  may still show a brief pillarbox transition.
+- **Vulkan** — compiled and offered as an experimental renderer; software remains
+  the default reference path for this title.
+- **Netplay** — recomp-net, rollback/runtime support, lobby plumbing and LAN/
+  direct-IP paths are compiled. Online ICE/TURN requires the separately pinned
+  `libjuice` dependency and is not enabled by the offline build.
 
 ---
 
@@ -57,8 +64,8 @@ Both enhancements shipped in this repository are **WORK IN PROGRESS**:
 ```
 DBFinalBoutRecomp/
 ├── disc/                # NO incluido. Tu copia legal del juego (.bin/.cue) — ver baserom.md
-├── src / psxrecomp/     # Runtime + recompiler (submodule con los mods de NovaPowers)
-├── mods/                # Manifiestos .psxmod de los mods (widescreen WIP, custom-combat WIP)
+├── psxrecomp/           # Runtime + recompiler submodule
+├── mods/                # Manifiestos .psxmod de los mods (widescreen WIP)
 ├── generated/           # NO incluido. Código recompilado generado localmente (ver abajo)
 ├── seeds/               # Seeds de primera pasada del boot EXE
 ├── ghidra_proj/         # Scripts de análisis / ingeniería inversa
