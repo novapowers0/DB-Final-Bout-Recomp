@@ -1,122 +1,125 @@
 # Dragon Ball GT: Final Bout Recompiled
 
+[English](README.md) | [Español](README_ES.md)
+
 [![Release](https://img.shields.io/github/v/release/novapowers0/DB-Final-Bout-Recomp?sort=semver&style=flat-square&color=orange&label=Release)](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/latest)
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D6?style=flat-square)](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/latest)
 [![License](https://img.shields.io/github/license/novapowers0/DB-Final-Bout-Recomp?style=flat-square)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/novapowers0/DB-Final-Bout-Recomp?style=flat-square&color=yellow)](https://github.com/novapowers0/DB-Final-Bout-Recomp)
 [![Built with](https://img.shields.io/badge/built%20with-PSXRecomp-8A2BE2?style=flat-square)](https://github.com/mstan/psxrecomp)
 
-Recompilacion estatica para PC de *Dragon Ball GT: Final Bout* para PlayStation,
-basada en [PSXRecomp](https://github.com/mstan/psxrecomp) y
+Static recompilation for PC of *Dragon Ball GT: Final Bout* for PlayStation,
+based on [PSXRecomp](https://github.com/mstan/psxrecomp) and
 [recomp-ui](https://github.com/mstan/recomp-ui).
 
-El codigo MIPS original se recompila como codigo nativo para Windows y se integra
-en un ejecutable independiente con launcher, soporte de mods y configuracion de
-renderizado. No es un emulador tradicional.
+The original MIPS code is recompiled as native Windows code and integrated into
+an independent executable with a launcher, mod support and rendering settings.
+This is not a traditional emulator.
 
 | | |
 |---|---|
-| **Jugadores** | 1-2 |
-| **Plataforma** | Windows x64 |
+| **Players** | 1-2 |
+| **Platform** | Windows x64 |
 | **Region** | USA |
 | **Serial** | SLUS-00493 |
-| **Genero** | Lucha 3D |
+| **Genre** | 3D fighting |
 | **Version** | v0.1.0 |
 
-Copyright (c) 2026 **NovaPowers**. Licencia MIT (ver `LICENSE`).
+Copyright (c) 2026 **NovaPowers**. MIT License (see `LICENSE`).
 
 ---
 
-## Aviso legal
+## Legal Notice
 
-El juego y sus datos **no se distribuyen**. Para jugar debes aportar los archivos
-de tu **copia legal** de *Dragon Ball GT: Final Bout*.
+The game and its data are **not distributed**. You must provide files from your
+**legally owned** copy of *Dragon Ball GT: Final Bout*.
 
-- El proyecto espera la version USA `SLUS-00493`.
-- Consulta `baserom.md` para el tamano, serial, volumen y checksums esperados.
-- Las imagenes de disco, el BIOS retail y el codigo generado no se incluyen.
-- El codigo recompilado se genera localmente a partir de tus propios archivos.
+- This project expects the USA version `SLUS-00493`.
+- See `baserom.md` for the expected size, serial, volume and checksums.
+- Disc images, retail BIOS files and generated game code are not included.
+- Recompiled code is generated locally from your own game files.
 
-Proyecto no oficial, sin animo de lucro, de investigacion y preservacion. No esta
-afiliado ni avalado por Bandai, Shueisha, Toei Animation ni ningun titular de los
-derechos de Dragon Ball.
+This is an unofficial, non-commercial research and preservation project. It is
+not affiliated with or endorsed by Bandai, Shueisha, Toei Animation or any other
+Dragon Ball rightsholder.
 
 ---
 
-## Para jugar
+## Playing
 
-1. Descarga `dbfb-0.1.0-setup-host-win64.zip` desde
+1. Download `dbfb-0.1.0-setup-host-win64.zip` from
    [Releases](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/latest).
-2. Descomprime el paquete en una carpeta de Windows.
-3. Aporta tu copia legal siguiendo la identidad descrita en `baserom.md`.
-4. Ejecuta `DBFinalBout_Recompiled.exe` o abre el launcher incluido.
-5. Deja el widescreen desactivado para una presentacion 4:3 fiel, o activa
-   `psx.enhancement.widescreen` para 16:9/adaptive.
+2. Extract the package to a Windows folder.
+3. Provide your legally owned copy following the identity in `baserom.md`.
+4. Run `DBFinalBout_Recompiled.exe` or open the included launcher.
+5. Keep widescreen disabled for faithful 4:3 presentation, or enable
+   `psx.enhancement.widescreen` for 16:9/adaptive presentation.
 
-El paquete setup-host puede solicitar los datos del juego durante la primera
-configuracion. No descargues BIOS ni imagenes de disco desde este repositorio.
+The setup-host package may request the game files during first-time setup. Do
+not download BIOS files or disc images from this repository.
 
-### Configuracion recomendada
+### Recommended Settings
 
-- **Renderer:** software, como ruta de referencia.
-- **Widescreen:** stretch-only; 16:9/adaptive disponible.
-- **Vulkan:** disponible como opcion experimental.
-- **PGXP:** variante separada incluida para pruebas de precision.
-- **Netplay:** LAN/direct-IP disponible; ICE/TURN online no esta activado.
+- **Renderer:** software, as the reference path.
+- **Widescreen:** stretch-only; 16:9/adaptive available.
+- **Vulkan:** available as an experimental option.
+- **PGXP:** separate precision variant included for testing.
+- **Netplay:** LAN/direct-IP available; online ICE/TURN is not enabled.
 
 ---
 
-## Funcionalidades
+## Features
 
-| Funcion | Estado |
+| Feature | Status |
 |---|---|
-| Recompilacion estatica del ejecutable PS1 | Funcional |
-| Launcher Windows | Incluido |
-| Overlay cache y recompilacion nativa | Incluido en la build validada |
-| Widescreen 16:9/adaptive | Funcional en modo stretch-only |
-| FOV/culling experimental | Desactivado por estabilidad |
-| Renderer software | Ruta de referencia |
-| Renderer Vulkan | Experimental |
-| Runtime normal y PGXP | Incluidos |
-| Netplay LAN/direct-IP | Compilado, pendiente de prueba manual completa |
-| ICE/TURN online | No activado |
+| Static recompilation of the PS1 executable | Functional |
+| Windows launcher | Included |
+| Overlay cache and native overlay recompilation | Included in the validated build |
+| 16:9/adaptive widescreen | Functional in stretch-only mode |
+| Experimental FOV/culling | Disabled for stability |
+| Software renderer | Reference path |
+| Vulkan renderer | Experimental |
+| Normal and PGXP runtimes | Included |
+| LAN/direct-IP netplay | Compiled, pending full manual testing |
+| Online ICE/TURN | Not enabled |
 
-El widescreen conserva las coordenadas originales del juego. Algunos menus 2D
-pueden mostrar una breve transicion de pillarbox 4:3 al cambiar de escena.
+Widescreen preserves the game's original guest coordinates. Some 2D menus may
+show a brief 4:3 pillarbox transition when changing scenes.
 
 ---
 
-## Estructura del repositorio
+## Repository Structure
 
 ```text
 DB-Final-Bout-Recomp/
-├── psxrecomp/       # Recompiler y runtime como submodulo
-├── recomp-ui/       # Launcher y UI como submodulo
-├── mods/             # Configuracion y manifiestos de mods
-├── seeds/            # Seeds del ejecutable de Final Bout
-├── ghidra_proj/      # Herramientas de analisis e ingenieria inversa
-├── tools/            # Scripts de build, diagnostico y validacion
-├── generated/        # NO incluido: codigo generado localmente
-├── disc/             # NO incluido: tu imagen legal del juego
-├── game.toml         # Configuracion del runtime
-└── CMakeLists.txt    # Build del proyecto
+├── psxrecomp/       # Recompiler and runtime submodule
+├── recomp-ui/       # Launcher and UI submodule
+├── mods/            # Mod configuration and manifests
+├── seeds/           # Final Bout executable seeds
+├── ghidra_proj/     # Reverse-engineering and analysis tools
+├── tools/           # Build, diagnostic and validation scripts
+├── generated/       # NOT included: locally generated code
+├── disc/            # NOT included: your legally owned disc image
+├── game.toml        # Runtime configuration
+└── CMakeLists.txt   # Project build definition
 ```
 
 ---
 
-## Compilar desde el codigo
+## Building From Source
 
-Requisitos principales:
+Main requirements:
 
 - Windows x64.
-- Git con submodulos.
-- CMake 3.20 o posterior.
-- Ninja o un generador CMake equivalente.
+- Git with submodules.
+- CMake 3.20 or newer.
+- Ninja or another supported CMake generator.
 - Python 3.
-- Toolchain compatible con PSXRecomp.
-- Una copia legal del disco indicada en `baserom.md`.
+- A toolchain compatible with PSXRecomp.
+- The legally owned disc described in `baserom.md`.
 
 ```bash
+git clone --recurse-submodules https://github.com/novapowers0/DB-Final-Bout-Recomp.git
 cd DB-Final-Bout-Recomp
 
 git submodule update --init --recursive
@@ -125,53 +128,51 @@ git submodule update --init --recursive
 python3 psxrecomp/psxrecomp_cli.py generate \
   --config game.toml \
   --project-root . \
-  --disc "disc/<tu-disco>.cue"
+  --disc "disc/<your-disc>.cue"
 
 cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release --target psx-runtime
 ```
 
-Para validar la instalacion sin iniciar el juego:
+To validate the installation without launching the game:
 
 ```bash
 python tools/verify_offline.py
 ```
 
-El codigo de `generated/` se deriva de tu disco y nunca debe subirse al
-repositorio. Los artefactos de build y las imagenes del juego estan ignorados
-por Git.
+The contents of `generated/` are derived from your disc and must never be
+committed. Build artifacts and game images are ignored by Git.
 
 ---
 
-## Documentacion y diagnostico
+## Documentation and Diagnostics
 
-- `baserom.md`: identidad del disco y checksums.
-- `AGENTS.md`: reglas de trabajo y estado tecnico del proyecto.
-- `ANALISIS_CRASHES.md`: investigacion de freezes y overlays.
-- `SESSION_ANALYSIS.md`: flujo para capturar y analizar una sesion.
-- `summary.md`: historial detallado de decisiones y validaciones.
-- `tools/verify_offline.py`: comprobacion reproducible sin lanzar el juego.
+- `baserom.md`: disc identity and checksums.
+- `AGENTS.md`: project rules and technical state.
+- `ANALISIS_CRASHES.md`: freeze and overlay investigation.
+- `SESSION_ANALYSIS.md`: session capture and analysis workflow.
+- `summary.md`: detailed decision and validation history.
+- `tools/verify_offline.py`: reproducible validation without launching the game.
 
 ---
 
-## Historial de versiones
+## Version History
 
 ### v0.1.0
 
-Primera release jugable y validada del proyecto, con runtime actualizado,
-overlay cache, widescreen stretch-only, Vulkan experimental y soporte compilado
-de netplay.
+First playable and validated release, with the updated runtime, overlay cache,
+stretch-only widescreen, experimental Vulkan and compiled netplay support.
 
-La publicacion original `v0.0.1` fue retirada: estaba en un estado demasiado
-inestable, con crashes/freezes en transiciones de menus y combates y sin una
-validacion suficiente para presentarla como release soportada.
+The original `v0.0.1` publication was withdrawn because it was too unstable,
+with crashes/freezes during menu and fight transitions and insufficient
+validation to present it as a supported release.
 
 ---
 
-## Creditos
+## Credits
 
-- [PSXRecomp](https://github.com/mstan/psxrecomp): recompilador y runtime PS1.
-- [recomp-ui](https://github.com/mstan/recomp-ui): launcher y componentes de UI.
-- [recomp-net](https://github.com/TechnicallyComputers/recomp-net): transporte y
-  soporte de netplay.
-- **NovaPowers**: integracion de Final Bout, configuracion, mods y herramientas.
+- [PSXRecomp](https://github.com/mstan/psxrecomp): PS1 recompiler and runtime.
+- [recomp-ui](https://github.com/mstan/recomp-ui): launcher and UI components.
+- [recomp-net](https://github.com/TechnicallyComputers/recomp-net): netplay
+  transport and support.
+- **NovaPowers**: Final Bout integration, configuration, mods and tooling.
