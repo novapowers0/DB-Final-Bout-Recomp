@@ -20,8 +20,10 @@ Esos congelamientos **no eran crashes nativos** sino **freezes del intérprete**
 `in_exception=1`). La causa: todo el gameplay vive en **overlays STEP\*.BIN**
 cargados en runtime, y sin cache nativo ese código corría 100% interpretado.
 
-Estado actual del objetivo principal: **el combate ya se juega completo** (un
-combate de inicio a fin, sin freeze). Quedan bugs visuales en combate (ver §8).
+Estado del proyecto (2026-09-26): los submódulos se actualizaron y la build
+Release volvió a compilar correctamente. El fix de Reserved Instruction para la
+transición a combate está integrado, pero **todavía falta validarlo jugando**
+Little Goku contra Piccolo. No dar la transición por resuelta hasta esa prueba.
 
 ---
 
@@ -44,6 +46,13 @@ declarar fronteras de overlay, usa **solo** prólogos reales de función
 - **Toolchain pack (clang/llvm_mingw)** usado para el build final del exe:
   `C:\Users\javie\.local\share\retcomm\toolchains\cmake-clang-v1\1.0.14`.
 - **Python:** se invoca `python` directamente (scripts de `psxrecomp/tools/`).
+- **Submódulos fijados (2026-09-26):** `psxrecomp` `7d70880d` (fork
+  `rework-master`, con upstream master integrado), `recomp-ui` `01bff947` y el
+  submódulo anidado `psxrecomp/lib/recomp-net` `c2338c63`.
+- **Validación posterior a la actualización:**
+  `ninja -C build-release DBFinalBout_Recompiled.exe` compiló y enlazó con
+  Ninja/clang. La prueba manual de transición Little Goku vs Piccolo sigue
+  pendiente; compilación correcta no equivale a validación in-game.
 - **Dependencia local de libchdr** (offline): `deps/libchdr`. Persistida en
   `build-release\CMakeCache.txt` vía `FETCHCONTENT_SOURCE_DIR_PSX_LIBCHDR` — **no
   perder** ese override o el "Generate & rebuild" intentará fetch de red.
@@ -262,31 +271,28 @@ cmake --build build-release --target psx-runtime
 
 ## 11. Siguientes pasos (priorizados)
 
-1. **Re-testear una pelea** con el combate completo nativo: `stall_report.py --port
-   4370 snap` debe mostrar `dispatch_native` alto y `dispatch_interp_fallback` bajo
-   (antes ~78128 vs ~1043655). Confirmar también el 2º combate (retrato rival +
-   sin pantalla negra) y el widescreen 16:9 (ahora ofertado en el launcher).
-2. **Sombras 3D defectuosas:** es del port base (proyección Z). Investigar a fondo
+1. **Validar el fix de transición** con `INICIAR_FINAL_BOUT_NATIVO.bat`, Little
+   Goku contra Piccolo. Revisar que la transición continúe y que no aparezca un
+   `psx_crash.txt` nuevo. El build está compilado; el resultado de esta prueba
+   manual sigue pendiente. Si se cuelga, probar el modo seguro y conservar los
+   diagnósticos para investigar la entrega de IRQ durante la reconstrucción de
+   la tabla de handlers. Ver `PLAN_SOLUCION_CRASH_Y_COMBATE.md` §3.2.
+2. Tras validar la transición, re-testear el combate nativo, el segundo combate
+   (retrato rival y ausencia de pantalla negra) y el widescreen 16:9. Usar
+   `stall_report.py --port 4370 snap` para comparar dispatch nativo e intérprete.
+3. **Sombras 3D defectuosas:** es del port base (proyección Z). Investigar a fondo
    si hay parámetro/sitio en `psxrecomp` (PGXP, `ws_far_threshold`,
    `geometry_correction`) que lo corrija — o documentar como limitación del port.
-3. **Multi-región:** decidir arquitectura de "1 exe, 3 regiones" (USA separada;
+4. **Multi-región:** decidir arquitectura de "1 exe, 3 regiones" (USA separada;
    EU+Spain code-identical). Ver `ANALISIS_CRASHES.md §9` y las notas de Buu's
    Fury / Bloody Roar 2 como referencia.
-4. **Cobertura nativa restante:** aplicar el mismo escaneo de prólogos a otras
+5. **Cobertura nativa restante:** aplicar el mismo escaneo de prólogos a otras
    regiones de menú que aún se saltan (`0x80023000`, `0x8002A000`, `0x8004C000`,
    `0x80050000`, `0x8005F000`) si causan problemas.
-5. **Widescreen real:** ya configurado stretch-only + offer 16:9/adaptive
+6. **Widescreen real:** ya configurado stretch-only + offer 16:9/adaptive
    (21/08). El cull `auto_screen_x` (0x200/0x1E0) ahora aplica en combate (STEP40
    nativo). Testear: 16:9 en combate, menús (pillarbox), y decidir si `squash=true`
    (FOV real) es viable pese al riesgo SXY — NO recomendado.
-6. **Framework más nuevo (informativo, 21/08):** los recomps recientes
-   (TechnicallyComputers/TwistedMetal4Recomp, /Street-Fighter-Alpha-3-Recomp,
-   /MastersOfTerasKasiRecomp) usan `mstan/psxrecomp` `feat/rbengine` a9a61b4 (muy
-   posterior a nuestro f2bb059). SF3/TerasKasi ponen TODO el gameplay en el text
-   principal (sin overlays). TerasKasi ISSUES.md documenta fixes de runtime
-   (interp→native handoffs, `native_handoffs` 15.8k). Una migración del submódulo
-   a a9a61b4 es posible pero GRANDE y arriesgada (pierde los mods nova-mods,
-   rehacer game.toml/overlays) — no hacerla salvo que el rendimiento lo exija.
 
 ### Verificación offline obligatoria
 

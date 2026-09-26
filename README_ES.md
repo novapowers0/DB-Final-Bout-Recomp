@@ -23,7 +23,11 @@ renderizado. No es un emulador tradicional.
 | **Region** | USA |
 | **Serial** | SLUS-00493 |
 | **Genero** | Lucha 3D |
-| **Version** | v0.1.0 |
+| **Version del proyecto** | v0.1.1 |
+
+La version del codigo fuente del repositorio es **v0.1.1**. La ultima release
+empaquetada sigue siendo **v0.1.0**; v0.1.1 registra la actualizacion del codigo
+y los frameworks, pero aun no tiene un paquete de release publicado.
 
 Copyright (c) 2026 **NovaPowers**. Licencia MIT (ver `LICENSE`).
 
@@ -40,6 +44,8 @@ de tu **copia legal** de *Dragon Ball GT: Final Bout*.
 - El codigo recompilado se genera localmente a partir de tus propios archivos.
 
 Proyecto no oficial, sin animo de lucro, de investigacion y preservacion. No esta
+afiliado ni respaldado por Bandai, Shueisha, Toei Animation ni otros titulares
+de derechos de Dragon Ball.
 
 ---
 
@@ -149,6 +155,8 @@ por Git.
 - `baserom.md`: identidad del disco y checksums.
 - `AGENTS.md`: reglas de trabajo y estado tecnico del proyecto.
 - `ANALISIS_CRASHES.md`: investigacion de freezes y overlays.
+- `PLAN_SOLUCION_CRASH_Y_COMBATE.md`: estado actual y pasos de validacion del
+  fix RI de la transicion a combate.
 - `SESSION_ANALYSIS.md`: flujo para capturar y analizar una sesion.
 - `summary.md`: historial detallado de decisiones y validaciones.
 - `tools/verify_offline.py`: comprobacion reproducible sin lanzar el juego.
@@ -156,6 +164,17 @@ por Git.
 ---
 
 ## Historial de Versiones
+
+### v0.1.1 (actualizacion del codigo fuente)
+
+Actualizacion de mantenimiento: se actualizaron los submodulos `psxrecomp` y
+`recomp-ui`, y el proyecto se recompilo correctamente. `psxrecomp` incluye la
+integracion de upstream y el fix de Reserved Instruction para el dispatch de la
+transicion a combate. Ese fix aun requiere validacion manual dentro del juego.
+Esta version del codigo fuente todavia no tiene un paquete de release publicado.
+
+Pins de frameworks: `psxrecomp` `7d70880d` (`rework-master`), `recomp-ui`
+`01bff947` y el submodulo anidado `recomp-net` `c2338c63`.
 
 ### v0.1.0
 

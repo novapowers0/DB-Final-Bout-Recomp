@@ -1,8 +1,14 @@
 # DBFinalBout Recomp — Análisis de crasheos y plan de corrección
 
-> Sesión de diagnóstico comparando contra el proyecto hermano **Bloody Roar 2**
-> (estable, release v0.5.0). Documenta el **root cause** de los crasheos, el
-> **fix aplicado** y el **trabajo pendiente** para estabilizar el combate.
+> Análisis histórico de los freezes de overlays y del fallo de transición a
+> combate. El fix RI está aplicado y la build compiló el 2026-09-26; aún falta
+> validación manual de Little Goku contra Piccolo y comparación con Beetle.
+
+Los apartados 1–8 documentan principalmente freezes históricos del intérprete.
+El fail-fast de transición analizado en §9 es un incidente distinto: se detectó
+una instrucción SPECIAL inválida en una ranura de handler que el juego estaba
+reconstruyendo. El fix RI está compilado, pero no se considera validado hasta la
+prueba manual pendiente.
 
 ---
 
@@ -92,7 +98,11 @@ coinciden ahora.
 
 ---
 
-## 4. El bloqueo real restante: el overlay de combate (STEP40) NO se compila
+## 4. Bloqueo histórico: el overlay de combate (STEP40) NO se compilaba
+
+Este apartado describe el estado previo al trabajo de overlays del 19/08; no es
+el estado actual. El STEP40 se compiló después (ver §7), y el problema posterior
+de transición a combate se analiza por separado en §9.
 
 Al recompilar los overlays (`compile_overlays.py --check --force`), la región del
 combate **se salta como "data-only"**:
@@ -198,10 +208,11 @@ PSX_SHARD_RESULT ok=1 failed=0
 El shard registra **26 funciones del combate** (rango `0x80069228..0x8006E5FC`),
 más aliases. El combate ya no depende del intérprete → se elimina el `spin_freeze`.
 
-### Pendiente de validación (usuario)
+### Validación histórica del shard (sesión anterior)
 1. Jugar una pelea con `overlay_cache=true` (ya activo) y el shard nuevo.
 2. Confirmar que no hay `psx_freeze_dump_*.json` nuevos ni el crash `0xD7FFFFAC`.
-3. Verificar nativo: `python psxrecomp/tools/stall_report.py --port 4370 snap`
+3. En aquella validación se propuso comprobar ejecución nativa con
+   `python psxrecomp/tools/stall_report.py --port 4370 snap`
    → `dispatch_native` alto frente a `dispatch_interp_fallback` bajo.
 
 ### Siguiente mejora (cobertura)
@@ -217,6 +228,162 @@ más aliases. El combate ya no depende del intérprete → se elimina el `spin_f
 
 ## 8. Notas de mantenimiento / higiene
 
+Las reglas de mantenimiento de esta sección siguen aplicando a cualquier
+recompilacion o cambio de configuracion.
+
+## 9. Crash de transición a combate — 2026-09-11
+
+Durante una sesión manual de prueba iniciada desde
+`INICIAR_FINAL_BOUT_CON_CAPTURA.bat`, el juego falló al iniciar un combate. No
+se produjo un JSON de captura completo porque la primera versión del capturador
+solo escribía el archivo al terminar normalmente. Sí se conservaron los
+informes del runtime en `build-release`.
+
+Evidence from `build-release/psx_crash.txt` and
+`build-release/psx_last_run_report.json`:
+
+- timestamp: `2026-09-11T16:25:07Z`;
+- frame: `5992`;
+- `FAIL-FAST unknown dispatch` at `0x00002934`;
+- return address: `0x0000293C`;
+- `a0 = 0x01000000`, `a1 = 0x00000400`;
+- last function address: `0x0000279C`;
+- exception EPC: `0x80041E78`;
+- one mid-block unsupported instruction at `0x00002030`, word
+  `0x000900FF`, classified as `SPECIAL funct`;
+- the unknown-dispatch ring contains exactly one entry;
+- the tail repeatedly executes the `0x00002914..0x00002964` region before the
+  fail-fast.
+
+Initial classification: a recompiler/discovery failure in a low-address
+exception or dispatch path. It was not evidence of a gameplay-rule bug and no
+Responsive plugin was active. The later RE in §9.1–9.3 refined this diagnosis:
+the kernel IRQ walker entered a handler slot being rebuilt, and an unsupported
+mid-block instruction caused the fail-fast. Do not add a guessed seed or patch
+`0x00002934`; the applied interpreter fix is documented in §9.3.
+
+The capture tool now writes an atomic `.json.partial` checkpoint after every
+manual sample, so a repeat of this test will retain evidence even if the game
+or terminal is closed unexpectedly.
+
+The second occurrence at `2026-09-11T16:28:51Z` has the same signature as the
+first (`0x00002934`, `ra=0x0000293C`, unsupported `0x000900FF` at
+`0x00002030`) and occurred while `build-release/settings.toml` selected Vulkan.
+The signature is in the CPU dispatch/exception path, so Vulkan is not currently
+the leading cause. An A/B launcher, `INICIAR_FINAL_BOUT_OPENGL_CON_CAPTURA.bat`,
+now allows a controlled OpenGL comparison without permanently changing the
+user's settings. If the same dispatch failure appears, the renderer is ruled
+out; if only OpenGL survives, renderer interaction remains a secondary suspect,
+but the CPU path still needs the primary fix.
+
+### 9.1 Addendum RE estático — 2026-09-11
+
+Análisis sobre el freeze dump del run que falló
+(`psx_freeze_dump_psx-runtime_1789144131_0.json`, frame 5750). Ver
+`PLAN_SOLUCION_CRASH_Y_COMBATE.md` para el detalle completo.
+
+**`0x2934` es el despachador de la cadena de IRQ del kernel.** Desensamblado de
+`0x291C..0x295C` (`ram_peeks.ra`):
+
+```
+lw s1,8(s6) / lw s0,4(s6) / beq s1,0 / jalr s1 / beq v0,0 /
+or v1,v0 / jalr s0 / lw s6,0(s6) / beq s6,ra (loop)
+```
+
+`gpr[17]=0x1F6C` (handler del juego), `gpr[31]=0x293C` (retorno del `jalr`). Es
+el recorredor de la cadena de callbacks de interrupción (`SysEnqIntRP`), no una
+función del juego: **no debe sembrarse.**
+
+**`0x2934` no es hueco de cobertura.** En ese mismo run se interpretó **40.740
+veces** (`dirty_block`, seq 2595200, frame 5750), la última justo antes del
+fallo. El rechazo es dependiente de estado.
+
+**Compuerta inicialmente sospechada, después descartada**
+(`dirty_ram_interp.c:2845`): el análisis preliminar consideró que si la página
+no estaba dirty y el objetivo no era game-text ni overlay,
+`dirty_ram_dispatch` devolvía 0 y llamaba a `psx_unknown_dispatch`. Para `0x2934`:
+`g_text_image_lo = 0x10000`, `g_overlay_region_floor = 0x3E000`, así que la
+única salida posible es el bit dirty o `psx_kernel_bless_dispatchable`. La
+ventana del kernel `[0,0x10000)` está **excluida a propósito** de la heurística
+"admitir palabra decodificable" (`dirty_ram_interp.h:79-83`).
+
+**Hipótesis inicial (posteriormente refutada):** la propia instrumentación. El
+cliente de captura anterior pedía `gpu_state`/`overlay`/`history` cada 5 s y
+volcaba rings de 100.000 entradas, lo que podía desplazar el timing durante la
+transición (carga de `STEP40` por CD + escritura de `overlay_cache`). La prueba
+con `INICIAR_FINAL_BOUT_NATIVO.bat` reprodujo el fallo sin capturador; véase §9.2
+y la hipótesis H1 en el plan.
+
+**Build de diagnóstico (aplicada):** `runtime/src/traps.c` ahora añade al
+`psx_crash.txt` una línea `refusal context: dirty=… overlay_region=… in_text=…
+kbless=… in_exception=… interp_unsupported=…`. Solo observación, sin cambio de
+comportamiento. `DBFinalBout_Recompiled.exe` reconstruido; backups en
+`DBFinalBout_Recompiled.exe.bak_pre_diag` y `%TEMP%\opencode\traps.c.bak_pre_diag`.
+
+### 9.2 Addendum — segunda prueba del usuario (2026-09-12)
+
+- `INICIAR_FINAL_BOUT_NATIVO.bat` **también crasheó** (sin capturador) → la
+  hipótesis de perturbación por instrumentación queda **descartada**.
+- `INICIAR_FINAL_BOUT_SEGURO.bat` (`PSX_FAIL_FAST_UNKNOWN_DISPATCH=0`) **no
+  crasheó**; el miss se absorbe y el juego continúa. Patrón reportado: crashes
+  con **Piccolo** de rival (jugador Little Goku); sin crash contra Goku adulto.
+- `psx_crash.txt` (build con diagnóstico) ahora reporta:
+  `dirty=1 overlay_region=0 in_text=0 kbless=0 in_exception=1
+  interp_unsupported=SPECIAL funct`.
+  - `dirty=1` **descarta la compuerta de página limpia** (`dirty_ram_interp.c:2845`).
+  - El intérprete cubre todo el set SPECIAL válido del R3000A, así que ese motivo
+    implica **datos ejecutados como código** o un `psx_unknown_dispatch` que **no
+    pasó por el intérprete**.
+  - El `dirty_block` termina en `0x2924 → 0x2934 → 0x1F6C` sin entrada posterior,
+    o sea el fallo **no entró por `dirty_ram_dispatch_inner`**. Vía candidata: el
+    preámbulo de overlays nativos
+    (`overlay_dispatch_preamble.c.inc:76`) y los stubs de `OpenBIOS_full.c`, que
+    invocan `psx_unknown_dispatch` directamente.
+- Diagnóstico ampliado otra vez: `psx_crash.txt` incluye
+  `interp detail: last_unsupported_pc / insn / block_entry / entry_ra / midblock /
+  aborts`. Build reconstruida.
+
+### 9.3 Addendum — causa raíz definitiva (reproducción Piccolo, frame 2356)
+
+```
+interp detail: last_unsupported_pc=0x00002030 insn=0x000900FF
+               block_entry=0x00001F6C entry_ra=0x0000293C midblock=1 aborts=1
+```
+
+1. El recorredor de IRQ del kernel (`0x291C..0x2954`) salta vía `jalr s1` al
+   handler `0x1F6C` (ranura de la tabla de handlers/eventos del juego).
+2. En el mismo frame, overlay de VS/transición `0x8003F000` (`pc=0x80042CBC`,
+   `ra=0x80042328`) **escribe ceros** sobre `[0x1F00,0x1FE0)` y pointers en
+   `0x1FE4+`: está limpiando/reconstruyendo esa tabla.
+3. `0x1F6C` está a ceros; el intérprete la ejecuta como código (49 NOPs) y en
+   `0x2030` encuentra `0x000900FF` (funct `0x3F`), no válida.
+4. `abort_unsupported(...,"SPECIAL funct")` → mid-block → `cpu->pc=0` → el
+   dispatch cae en `psx_unknown_dispatch(0x2934)` → fail-fast.
+
+En hardware, el paso 3 levanta **Reserved Instruction (ExcCode 10)** y corre el
+manejador del juego; el intérprete abortaba en lugar de excepcionar. **Fix
+aplicado** en `psxrecomp/runtime/src/dirty_ram_interp.c`: el caso mid-block de
+opcode no soportado llama a `interp_exception(cpu, 10, 0, g_unsupported_pc)`;
+el caso de primera instrucción sigue devolviendo `0` para preservar la resolución
+de trampolines. El cambio está commiteado en `psxrecomp` (`d76c5c39`) e integrado
+con upstream en `7d70880d`. La build Release se recompiló correctamente el
+2026-09-26. **La prueba manual de Little Goku contra Piccolo y la validación
+contra Beetle siguen pendientes**; no afirmar que la transición ya está
+corregida en ejecución. El disparador observado es la entrega de IRQ mientras
+se reconstruye la tabla; el timing fiel sigue siendo el arreglo de fondo. Ver
+`PLAN_SOLUCION_CRASH_Y_COMBATE.md` §3.2.
+
+### 9.4 Actualización de frameworks — 2026-09-26
+
+- `psxrecomp` actualizado con merge de upstream master en `rework-master`:
+  `7d70880d` (base upstream `d62f4b44`), publicado en el fork
+  `novapowers0/psxrecomp`.
+- `recomp-ui` actualizado a `01bff947` (fast-forward de upstream master).
+- Submódulo anidado `psxrecomp/lib/recomp-net`: `c2338c63`.
+- `DBFinalBout_Recompiled.exe` se recompiló con Ninja/clang; el target enlazó
+  correctamente. Esto verifica build, no el comportamiento manual del juego.
+- Versión del proyecto: `0.1.1`; la release empaquetada `v0.1.0` no se modificó.
+
 - **Nunca editar solo `build-release/game.toml`**: es regenerado por CMake
   (POST_BUILD `copy_if_different`). Editar el fuente `game.toml` y **rehacer el
   build** para que el staged se refresque. El desync de hoy vino de editar el
@@ -231,7 +398,7 @@ más aliases. El combate ya no depende del intérprete → se elimina el `spin_f
 
 ---
 
-## 9. Referencias
+## 10. Referencias
 
 - `psxrecomp/docs/COMPILING_OVERLAYS.md` — pipeline overlay cache.
 - `psxrecomp/docs/overlay-status.md` — bugs conocidos (OV-1 stale registration;

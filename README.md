@@ -23,7 +23,11 @@ This is not a traditional emulator.
 | **Region** | USA |
 | **Serial** | SLUS-00493 |
 | **Genre** | 3D fighting |
-| **Version** | v0.1.0 |
+| **Project version** | v0.1.1 |
+
+The repository source version is **v0.1.1**. The latest packaged release is
+still **v0.1.0**; v0.1.1 records the source and framework update and has not been
+published as a release package yet.
 
 Copyright (c) 2026 **NovaPowers**. MIT License (see `LICENSE`).
 
@@ -150,6 +154,8 @@ committed. Build artifacts and game images are ignored by Git.
 - `baserom.md`: disc identity and checksums.
 - `AGENTS.md`: project rules and technical state.
 - `ANALISIS_CRASHES.md`: freeze and overlay investigation.
+- `PLAN_SOLUCION_CRASH_Y_COMBATE.md`: current status and validation steps for
+  the combat-transition RI fix.
 - `SESSION_ANALYSIS.md`: session capture and analysis workflow.
 - `summary.md`: detailed decision and validation history.
 - `tools/verify_offline.py`: reproducible validation without launching the game.
@@ -157,6 +163,17 @@ committed. Build artifacts and game images are ignored by Git.
 ---
 
 ## Version History
+
+### v0.1.1 (source update)
+
+Maintenance update: refreshed the `psxrecomp` and `recomp-ui` submodule pins and
+rebuilt the project successfully. `psxrecomp` includes the upstream merge and
+the Reserved Instruction fix for the combat-transition dispatch. That fix still
+needs manual in-game validation. This source version does not have a matching
+release package yet.
+
+Framework pins: `psxrecomp` `7d70880d` (`rework-master`), `recomp-ui`
+`01bff947`, and nested `recomp-net` `c2338c63`.
 
 ### v0.1.0
 

@@ -1,5 +1,105 @@
 # DBFinalBout Recomp — Session Summary
 
+## 2026-09-26: frameworks actualizados y documentación de estado
+
+- `psxrecomp`: merge upstream master en `rework-master`, commit `7d70880d`
+  (base upstream `d62f4b44`), publicado en `novapowers0/psxrecomp`. El fix RI y
+  diagnóstico están preservados en `d76c5c39`.
+- `recomp-ui`: fast-forward a `01bff947`.
+- `psxrecomp/lib/recomp-net`: pin anidado `c2338c63`.
+- Build Release verificada: Ninja/clang enlazó
+  `DBFinalBout_Recompiled.exe` correctamente el 2026-09-26. Aún falta probar en
+  juego la transición Little Goku vs Piccolo; compilación correcta no equivale a
+  validación funcional.
+- `VERSION` del proyecto subió de `0.1.0` a `0.1.1`. La release empaquetada más
+  reciente continúa siendo `v0.1.0`; no se creó un paquete nuevo.
+- La actualización del framework incorpora, entre otros cambios, el rediseño
+  SIO/IRQ upstream. En `gpu.c` se adoptó el scene latch upstream; se preservó
+  `sio_no_tx_gate` y se sustituyó el shim temporal de chat filter por la API real
+  de `recomp-net`.
+
+## 2026-09-12: H1 refutada; el fallo no es la compuerta ni la instrumentación
+
+- `INICIAR_FINAL_BOUT_NATIVO.bat` (sin capturador) **también crasheó** →
+  descartada la hipótesis de perturbación por el cliente de diagnóstico.
+- `INICIAR_FINAL_BOUT_SEGURO.bat` (`PSX_FAIL_FAST_UNKNOWN_DISPATCH=0`) **no
+  crasheó**. Patrón del usuario: crashes con **Piccolo** de rival, sin crash
+  contra Goku adulto (posible palanca de reproducción, no confirmado).
+- El `psx_crash.txt` con el diagnóstico ampliado dice:
+  `dirty=1 overlay_region=0 in_text=0 kbless=0 in_exception=1
+  interp_unsupported=SPECIAL funct`.
+  - `dirty=1` descarta la compuerta de página limpia.
+  - El intérprete cubre todo el set SPECIAL R3000A → el motivo implica
+    datos-como-código o un `psx_unknown_dispatch` que no pasó por el intérprete.
+  - Sin entrada nueva en `dirty_block` tras `0x1F6C` → el fallo evita
+    `dirty_ram_dispatch_inner`. Vía candidata: preámbulo de overlays nativos y
+    stubs de `OpenBIOS_full.c`.
+- Diagnóstico ampliado con `interp detail: last_unsupported_pc/insn/block_entry/
+  entry_ra/midblock/aborts`; build `DBFinalBout_Recompiled.exe` reconstruida.
+- **Causa raíz definitiva (reproducida, frame 2356):** el recorredor de IRQ del
+  kernel salta a la ranura `0x1F6C` de la tabla de handlers del juego, que en ese
+  mismo frame el overlay `0x8003F000` (`pc=0x80042CBC`) está **limpiando a ceros**
+  (`[0x1F00,0x1FE0)`). El intérprete ejecuta la ranura a ceros (49 NOPs) y en
+  `0x2030` encuentra `0x000900FF` (funct 0x3F), no válida → `abort_unsupported`
+  → `cpu->pc=0` → `psx_unknown_dispatch(0x2934)` → fail-fast. En hardware habría
+  **Reserved Instruction exception**; el intérprete aborta. **Fix aplicado:**
+  `interp_exception(cpu, 10, 0, g_unsupported_pc)` en el caso mid-block
+  (`dirty_ram_interp.c:3126`; mismo mecanismo ya usado para address errors).
+  Build reconstruida 12/09 02:29. Reversión: `%TEMP%\opencode\dirty_ram_interp.c.bak_pre_ri`
+  + `DBFinalBout_Recompiled.exe.bak_pre_diag`. Es foundation compartida: validar
+  con oráculo. Ver `PLAN_SOLUCION_CRASH_Y_COMBATE.md` §3.2 y `ANALISIS_CRASHES.md` §9.3.
+- Ver `PLAN_SOLUCION_CRASH_Y_COMBATE.md` §3.1 y `ANALISIS_CRASHES.md` §9.2.
+
+## 2026-09-11 (tarde): RE del crash, build de diagnóstico y plan de combate (H1 histórica; refutada el 09-12)
+
+Ver `PLAN_SOLUCION_CRASH_Y_COMBATE.md` para el detalle completo.
+
+- **`0x2934` NO es hueco de cobertura**: en el run del crash (frame 5750) se
+  interpretó **40.740 veces**, la última justo antes del fallo. El rechazo es
+  dependiente de estado.
+- Desensamblado verificado de `0x291C..0x295C`: es el **recorredor de la cadena
+  de handlers de IRQ del kernel** (`lw`/`beq`/`jalr s1`/`jalr s0`/loop). No es
+  una función del juego: no se siembra.
+- Compuerta del rechazo: `dirty_ram_interp.c:2845` exige página dirty o región
+  de overlay o game-text; la ventana del kernel `[0,0x10000)` está excluida a
+  propósito. Para `0x2934` solo quedan `dirty` o `psx_kernel_bless_dispatchable`.
+- **Hipótesis inicial H1 (luego refutada)**: la instrumentación (capturador con `history`/
+  `gpu_state` cada 5 s + rings de 100.000 entradas) desplaza el timing en la
+  transición a combate (carga de STEP40 + escritura de overlay_cache). El usuario
+  reporta que el `.exe` nativo funcionaba sin diagnósticos.
+- **Build de diagnóstico aplicada (solo observación)**: `runtime/src/traps.c`
+  añade a `psx_crash.txt` la línea `refusal context: dirty=… overlay_region=…
+  in_text=… kbless=… in_exception=… interp_unsupported=…`. `DBFinalBout_Recompiled.exe`
+  reconstruido (Ninja/clang). Backups: `DBFinalBout_Recompiled.exe.bak_pre_diag`
+  y `%TEMP%\opencode\traps.c.bak_pre_diag`.
+- **Lanzadores nuevos**: `INICIAR_FINAL_BOUT_NATIVO.bat` (control, sin TCP),
+  `INICIAR_FINAL_BOUT_SEGURO.bat` (`PSX_FAIL_FAST_UNKNOWN_DISPATCH=0`),
+  `INICIAR_FINAL_BOUT_OBSERVAR_LIGERO.bat` (captura `--light`).
+- **Capturador**: flags nuevos `--light` (solo contadores baratos) y `--rings`
+  (volcado pesado, ahora opt-in). El JSON registra `light`/`rings`.
+- **Sin cambios de comportamiento de gameplay.** El combate sigue sin mod Responsive.
+
+## 2026-09-11: crash de transición y captura resiliente
+
+- Una prueba manual falló al iniciar un combate en el frame `5992` con
+  `FAIL-FAST unknown dispatch` en `0x00002934`, `ra=0x0000293C`.
+- La repetición falló de nuevo en el frame `5750` con la firma idéntica:
+  `0x00002934`, `ra=0x0000293C`, `epc=0x80041E78` y `SPECIAL funct` en
+  `0x00002030`. El renderer de `settings.toml` era Vulkan.
+- La captura parcial `build-release/captures/final_bout_manual_play_24456.json.partial`
+  sí quedó guardada hasta la desconexión del debug server. Los errores WinError
+  10053 posteriores solo indican que el proceso del juego ya había terminado.
+- El informe también registra una instrucción `SPECIAL funct` no soportada en
+  `0x00002030`; queda pendiente verificar la ruta antes de añadir seeds o
+  modificar código.
+- No había mod de gameplay activo: el fallo pertenece a cobertura/dispatch del
+  runtime o del recompiler, no al diseño Responsive.
+- La primera captura no llegó a producir JSON porque el proceso se cerró antes
+  de su escritura final. El capturador fue corregido para guardar checkpoints
+  atómicos `.json.partial` después de cada muestra.
+- Se añadió `INICIAR_FINAL_BOUT_OPENGL_CON_CAPTURA.bat` para realizar una prueba
+  A/B con OpenGL y restaurar automáticamente el renderer original.
+
 ## 2026-09-09: v0.1.0 release preparation
 
 - Confirmed the first playable release milestone: four complete fights were
