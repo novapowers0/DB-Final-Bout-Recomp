@@ -11,12 +11,18 @@
   `DBFinalBout_Recompiled.exe` correctamente el 2026-09-26. Aún falta probar en
   juego la transición Little Goku vs Piccolo; compilación correcta no equivale a
   validación funcional.
-- `VERSION` del proyecto subió de `0.1.0` a `0.1.1`. La release empaquetada más
-  reciente continúa siendo `v0.1.0`; no se creó un paquete nuevo.
+- `VERSION` del proyecto subió de `0.1.0` a `0.1.1`; se preparó el paquete
+  `dbfb-0.1.1-setup-host-win64.zip` para la release correspondiente.
 - La actualización del framework incorpora, entre otros cambios, el rediseño
   SIO/IRQ upstream. En `gpu.c` se adoptó el scene latch upstream; se preservó
   `sio_no_tx_gate` y se sustituyó el shim temporal de chat filter por la API real
   de `recomp-net`.
+- Rebuild de release con `PSX_GAME_VERSION=0.1.1`: variantes normal y PGXP
+  enlazadas. Packager setup-host oficial ejecutado; los controles verificaron
+  ZIP íntegro, pins nuevos, VERSION/stamp `0.1.1` y ausencia de disc/BIOS retail.
+  `dist/dbfb-0.1.1-setup-host-win64.zip` (33,058,485 bytes), SHA-256
+  `edfa917b4faac1377050326ab954b14adf648a50a94e85431257f2786f8cae83`.
+  La transición Little Goku vs Piccolo aún requiere prueba manual in-game.
 
 ## 2026-09-12: H1 refutada; el fallo no es la compuerta ni la instrumentación
 

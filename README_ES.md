@@ -23,11 +23,7 @@ renderizado. No es un emulador tradicional.
 | **Region** | USA |
 | **Serial** | SLUS-00493 |
 | **Genero** | Lucha 3D |
-| **Version del proyecto** | v0.1.1 |
-
-La version del codigo fuente del repositorio es **v0.1.1**. La ultima release
-empaquetada sigue siendo **v0.1.0**; v0.1.1 registra la actualizacion del codigo
-y los frameworks, pero aun no tiene un paquete de release publicado.
+| **Version** | v0.1.1 |
 
 Copyright (c) 2026 **NovaPowers**. Licencia MIT (ver `LICENSE`).
 
@@ -51,7 +47,7 @@ de derechos de Dragon Ball.
 
 ## Para Jugar
 
-1. Descarga `dbfb-0.1.0-setup-host-win64.zip` desde
+1. Descarga `dbfb-0.1.1-setup-host-win64.zip` desde
    [Releases](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/latest).
 2. Descomprime el paquete en una carpeta de Windows.
 3. Aporta tu copia legal siguiendo la identidad descrita en `baserom.md`.
@@ -157,6 +153,7 @@ por Git.
 - `ANALISIS_CRASHES.md`: investigacion de freezes y overlays.
 - `PLAN_SOLUCION_CRASH_Y_COMBATE.md`: estado actual y pasos de validacion del
   fix RI de la transicion a combate.
+- `RELEASE_NOTES_v0.1.1.md`: cambios y estado de validacion de esta release.
 - `SESSION_ANALYSIS.md`: flujo para capturar y analizar una sesion.
 - `summary.md`: historial detallado de decisiones y validaciones.
 - `tools/verify_offline.py`: comprobacion reproducible sin lanzar el juego.
@@ -165,13 +162,13 @@ por Git.
 
 ## Historial de Versiones
 
-### v0.1.1 (actualizacion del codigo fuente)
+### v0.1.1
 
-Actualizacion de mantenimiento: se actualizaron los submodulos `psxrecomp` y
-`recomp-ui`, y el proyecto se recompilo correctamente. `psxrecomp` incluye la
+Release de mantenimiento: se actualizaron los submodulos `psxrecomp` y
+`recomp-ui`, y se reconstruyo el paquete setup-host. `psxrecomp` incluye la
 integracion de upstream y el fix de Reserved Instruction para el dispatch de la
-transicion a combate. Ese fix aun requiere validacion manual dentro del juego.
-Esta version del codigo fuente todavia no tiene un paquete de release publicado.
+transicion a combate. La nueva build compila correctamente; la transicion
+Little Goku contra Piccolo aun requiere validacion manual dentro del juego.
 
 Pins de frameworks: `psxrecomp` `7d70880d` (`rework-master`), `recomp-ui`
 `01bff947` y el submodulo anidado `recomp-net` `c2338c63`.

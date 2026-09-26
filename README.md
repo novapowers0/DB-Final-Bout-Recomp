@@ -23,11 +23,7 @@ This is not a traditional emulator.
 | **Region** | USA |
 | **Serial** | SLUS-00493 |
 | **Genre** | 3D fighting |
-| **Project version** | v0.1.1 |
-
-The repository source version is **v0.1.1**. The latest packaged release is
-still **v0.1.0**; v0.1.1 records the source and framework update and has not been
-published as a release package yet.
+| **Version** | v0.1.1 |
 
 Copyright (c) 2026 **NovaPowers**. MIT License (see `LICENSE`).
 
@@ -51,7 +47,7 @@ Dragon Ball rightsholder.
 
 ## Playing
 
-1. Download `dbfb-0.1.0-setup-host-win64.zip` from
+1. Download `dbfb-0.1.1-setup-host-win64.zip` from
    [Releases](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/latest).
 2. Extract the package to a Windows folder.
 3. Provide your legally owned copy following the identity in `baserom.md`.
@@ -156,6 +152,7 @@ committed. Build artifacts and game images are ignored by Git.
 - `ANALISIS_CRASHES.md`: freeze and overlay investigation.
 - `PLAN_SOLUCION_CRASH_Y_COMBATE.md`: current status and validation steps for
   the combat-transition RI fix.
+- `RELEASE_NOTES_v0.1.1.md`: changes and known validation status for this release.
 - `SESSION_ANALYSIS.md`: session capture and analysis workflow.
 - `summary.md`: detailed decision and validation history.
 - `tools/verify_offline.py`: reproducible validation without launching the game.
@@ -164,13 +161,13 @@ committed. Build artifacts and game images are ignored by Git.
 
 ## Version History
 
-### v0.1.1 (source update)
+### v0.1.1
 
-Maintenance update: refreshed the `psxrecomp` and `recomp-ui` submodule pins and
-rebuilt the project successfully. `psxrecomp` includes the upstream merge and
-the Reserved Instruction fix for the combat-transition dispatch. That fix still
-needs manual in-game validation. This source version does not have a matching
-release package yet.
+Maintenance release: refreshed the `psxrecomp` and `recomp-ui` submodule pins
+and rebuilt the setup-host package. `psxrecomp` includes the upstream merge and
+the Reserved Instruction fix for the combat-transition dispatch. The new build
+compiles successfully; the specific Little Goku vs Piccolo transition still
+needs manual in-game validation.
 
 Framework pins: `psxrecomp` `7d70880d` (`rework-master`), `recomp-ui`
 `01bff947`, and nested `recomp-net` `c2338c63`.

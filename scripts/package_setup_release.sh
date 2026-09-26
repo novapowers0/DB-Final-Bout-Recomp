@@ -54,6 +54,9 @@ exec bash "${PACKAGER}" \
   --project-file codegen_setup.c \
   --project-file codegen_setup.h \
   --project-file README.md \
+  --project-file RELEASE_NOTES_v0.1.1.md \
+  --project-dir assets \
+  --project-dir deps/libchdr \
   --project-dir seeds \
   --project-dir launcher_assets \
   "${EXTRA_PROJECT[@]}"
