@@ -20,7 +20,9 @@
 - Rebuild de release con `PSX_GAME_VERSION=0.1.1`: variantes normal y PGXP
   enlazadas. Packager setup-host oficial ejecutado; los controles verificaron
   ZIP íntegro, pins nuevos, VERSION/stamp `0.1.1` y ausencia de disc/BIOS retail.
-  `dist/dbfb-0.1.1-setup-host-win64.zip` (33,058,485 bytes), SHA-256
+  Publicado como GitHub Release `v0.1.1`:
+  `https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.1.1`.
+  Asset `dbfb-0.1.1-setup-host-win64.zip` (33,058,485 bytes), SHA-256
   `edfa917b4faac1377050326ab954b14adf648a50a94e85431257f2786f8cae83`.
   La transición Little Goku vs Piccolo aún requiere prueba manual in-game.
 
