@@ -56,6 +56,8 @@ exec bash "${PACKAGER}" \
   --project-file README.md \
   --project-file RELEASE_NOTES_v0.1.1.md \
   --project-dir assets \
+  --project-dir src \
+  --project-dir mods/preloaded \
   --project-dir deps/libchdr \
   --project-dir seeds \
   --project-dir launcher_assets \

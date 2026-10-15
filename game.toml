@@ -30,6 +30,7 @@ known_sha1 = [
 seeds = "seeds/ghidra_funcs.txt"
 out_dir = "generated"
 strict = true
+mod_function_entry_funcs = ["0x80028D80"]
 
 [runtime]
 window_title = "DBFinalBout Recompiled"
@@ -72,35 +73,20 @@ geometry_correction = false
 perspective_texturing = false
 pgxp_cpu_mode = false
 
-# True-widescreen codegen sites. The psx.enhancement.widescreen mod moves the
-# display aspect off 4:3; auto_screen_x then widens every GTE screen-extent
-# cull that matches the render-funnel signature so the fight reveals the extra
-# horizontal world (identity at 4:3). auto_backdrop preloads scrolling
-# backdrop column windows for the wider frame. gte_game_mode arms the generic
-# 3D-activity detector that keeps menus/2D from being stretched.
+# The default-disabled title mod selects 16:9 or adaptive framing through 21:9.
+# OpenGL native-wide uses host presentation and guarded render tags; guest
+# projection, memory, timing and culling remain unchanged. Software stays the
+# reference default. Select OpenGL in the launcher to try this preview.
 [widescreen]
 gte_game_mode = true
-# squash=false: the GTE X-squash corrupts this game (its gameplay/rendering
-# logic reads projected SXY for actor culling and UI layout, so compressed
-# coords drop character polygons and break menus). With squash off the guest
-# stays 100% vanilla and the 4:3 frame is presented stretched to the wide
-# aspect — no FOV widening, zero guest corruption. NOTE: this means Final
-# Bout's widescreen is STRETCH-ONLY (like BR2 with squash, but the X-squash
-# is off). True extra-FOV would require squash=true, which is unsafe here.
 squash = false
-native_wide = false
-# Presentation offers (same framework keys as Bloody Roar II). offer=true
-# exposes the 16:9 choice in the launcher; adaptive_view lets the live window
-# shape drive the aspect (clamped to the widest offered = 16:9). Ultrawide
-# 21:9 is NOT offered: stretch is safe, but the auto_screen_x cull widening
-# has not been validated at 21:9 for this funnel.
+native_wide = true
+auto_ui_squash = false
+hud_sprt_squash = false
+clear_reveal = true
+# Legacy offers remain parseable; the title package owns aspect activation.
 offer = true
 adaptive_view = true
-# precise_nclip: fighting game with lots of geometry near the frame edges —
-# the same class as Bloody Roar II, where the widened NCLIP clamp avoids
-# wide-edge clipping artifacts on the extended FOV (verified in BR2).
-# Exact NCLIP consumes enhancement provenance and can reject the same edge
-# triangles whose SXY values this title reads back for its own culling.
 precise_nclip = false
 
 [widescreen.cull]

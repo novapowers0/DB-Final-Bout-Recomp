@@ -52,8 +52,9 @@ Dragon Ball rightsholder.
 2. Extract the package to a Windows folder.
 3. Provide your legally owned copy following the identity in `baserom.md`.
 4. Run `DBFinalBout_Recompiled.exe` or open the included launcher.
-5. Keep widescreen disabled for faithful 4:3 presentation, or enable
-   `psx.enhancement.widescreen` for 16:9/adaptive presentation.
+5. Keep widescreen disabled for the 4:3 reference path. To try the native-wide
+   preview, select OpenGL, enable **Final Bout Native Widescreen (OpenGL Preview)**
+   in Mods, and choose 16:9 or Adaptive.
 
 The setup-host package may request the game files during first-time setup. Do
 not download BIOS files or disc images from this repository.
@@ -61,7 +62,8 @@ not download BIOS files or disc images from this repository.
 ### Recommended Settings
 
 - **Renderer:** software, as the reference path.
-- **Widescreen:** stretch-only; 16:9/adaptive available.
+- **Widescreen:** default-disabled OpenGL preview; 16:9 or adaptive from 4:3
+  through 21:9. See [implementation and validation limits](docs/WIDESCREEN.md).
 - **Vulkan:** available as an experimental option.
 - **PGXP:** separate precision variant included for testing.
 - **Netplay:** LAN/direct-IP available; online ICE/TURN is not enabled.
@@ -75,7 +77,7 @@ not download BIOS files or disc images from this repository.
 | Static recompilation of the PS1 executable | Functional |
 | Windows launcher | Included |
 | Overlay cache and native overlay recompilation | Included in the validated build |
-| 16:9/adaptive widescreen | Functional in stretch-only mode |
+| 16:9/adaptive widescreen | Native-wide OpenGL preview; fork gameplay validation pending |
 | Experimental FOV/culling | Disabled for stability |
 | Software renderer | Reference path |
 | Vulkan renderer | Experimental |

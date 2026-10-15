@@ -1,0 +1,49 @@
+format_version = 5
+id = "finalbout.enhancement.widescreen"
+version = "0.1.0"
+name = "Final Bout Native Widescreen (OpenGL Preview)"
+author = "mstan"
+description = "A wider combat view with title-specific HUD and background placement. Requires OpenGL; gameplay and camera validation is in progress."
+resolver = "declarative"
+save_compatibility = "shared"
+
+[[target]]
+game_id = "SLUS-00493"
+
+[[feature]]
+id = "widescreen"
+name = "Widescreen"
+description = "Reveal a wider combat view. Menus and movies preserve their original proportions."
+group = "Display"
+default_enabled = false
+
+[[option]]
+feature = "widescreen"
+id = "aspect"
+label = "Aspect ratio"
+description = "Adaptive follows the window from 4:3 through 21:9."
+group = "Display"
+type = "choice"
+default = "adaptive"
+
+[[option.choice]]
+value = "16:9"
+label = "16:9"
+
+[[option.choice]]
+value = "adaptive"
+label = "Adaptive"
+
+[[plugin]]
+feature = "widescreen"
+id = "finalbout.widescreen.fixed"
+when = { aspect = "16:9" }
+
+[[plugin]]
+feature = "widescreen"
+id = "finalbout.widescreen.adaptive"
+when = { aspect = "adaptive" }
+
+[[plugin]]
+feature = "widescreen"
+id = "finalbout.widescreen.packets"

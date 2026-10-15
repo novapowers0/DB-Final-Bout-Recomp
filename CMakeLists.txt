@@ -19,6 +19,8 @@ endif()
 # is still the reference renderer for Final Bout.
 set(PSX_ENABLE_VULKAN ON CACHE BOOL
     "Build the Vulkan renderer when the SDK is available" FORCE)
+# Keep this title's existing LAN/direct-IP scope during the dependency refresh.
+set(RNET_ENABLE_ICE OFF CACHE BOOL "Online ICE is outside this preview" FORCE)
 set(PSX_SETUP_WIZARD ON CACHE BOOL
     "Advertise first-run setup wizard + Generate & rebuild in recomp-ui" FORCE)
 # libchdr from a project-local copy when the network fetch is unavailable
@@ -40,6 +42,8 @@ set(PSX_PGXP_VARIANT ON CACHE BOOL
     "Also build the <exe>_pgxp PGXP precision-shadowing variant" FORCE)
 
 psxrecomp_add_game_runtime(psx-runtime
+    PRELOADED_MODS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mods/preloaded"
+    EXCLUDE_BUILTIN_MODS "psx.enhancement.widescreen"
     ENABLE_NETPLAY_IF_PRESENT
     NETPLAY_LOBBY_URL "ws://netplay.retcomm.net:8765"
     ENABLE_SETUP_WIZARD
@@ -51,6 +55,13 @@ psxrecomp_add_game_runtime(psx-runtime
     GEN_FULL_GLOB "generated/SLUS_004.93_full_*.c"
     CODEGEN_SETUP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/codegen_setup.c"
 )
+
+# The guarded native-wide plugin belongs to both normal and PGXP products.
+foreach(_DBFB_TARGET psx-runtime psx-runtime-pgxp)
+    if(TARGET ${_DBFB_TARGET})
+        target_sources(${_DBFB_TARGET} PRIVATE src/mods/final_bout_widescreen.c)
+    endif()
+endforeach()
 
 # Stage runtime configs next to the exe for direct build/ launches. Only copy
 # files that exist — never fail POST_BUILD when game_options.toml is absent.
