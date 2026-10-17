@@ -1,9 +1,13 @@
 # Final Bout — Solución del crash de transición y hoja de ruta de combate
 
-> Estado: actualizado 2026-09-26. El fix RI está aplicado en `psxrecomp` y la
-> build Release recompila correctamente con los frameworks actualizados. La
-> transición Little Goku vs Piccolo y la comparación con Beetle aún requieren
-> validación; hasta entonces el resultado funcional permanece pendiente.
+> Estado: actualizado 2026-09-26. El usuario completó Piccolo vs Goku y confirmó
+> que la transición al segundo combate Piccolo vs Little Goku Super Saiyan fue
+> estable con la recuperación del callback vacío. El reporte de esa sesión
+> termina normalmente en el frame 5438, sin fatal, unknown dispatch ni RI
+> pendiente. Se añadió un contador de la ruta de recuperación al heartbeat y al
+> reporte final para que próximas pruebas confirmen directamente que se ejercitó.
+> La estabilidad está confirmada para esta secuencia jugada; no implica garantía
+> universal ni sustituye la comparación con Beetle.
 
 ---
 
@@ -19,9 +23,10 @@
    quedó **refutada**: el lanzador nativo sin capturador también reprodujo el
    fallo (ver §3.1).
 4. Los lanzadores **nativo**, **seguro** (`PSX_FAIL_FAST_UNKNOWN_DISPATCH=0`) y
-   **observación ligera** siguen disponibles. La causa se identificó como una
-   RI en una ranura de handler que se estaba reconstruyendo; el fix está aplicado
-   y compilado, a la espera de validación manual.
+   **observación ligera** siguen disponibles. La causa fue una RI en una ranura
+   de handler que se reconstruía. La ruta se recuperó con una salida vacía
+   restringida al walker IRQ; la secuencia de dos combates ya pasó una prueba
+   manual. Un contador en heartbeat/reporte final permitirá vigilar regresiones.
 
 ---
 
@@ -218,15 +223,53 @@ El caso de **primera instrucción** (`insns_executed == 0`) se deja devolviendo 
 para no romper la resolución de trampolines de `psx_unknown_dispatch`.
 
 **Estado:** aplicado en commit `d76c5c39`, integrado en merge `7d70880d` y
-compilado de nuevo el 2026-09-26 con el framework actualizado. Ramas de
-seguridad locales: `backup/pre-update-20260926` en `psxrecomp` y el padre.
-La validación funcional y la comparación con el oráculo Beetle siguen pendientes.
+compilado con el framework actualizado. La prueba del usuario del 2026-09-26
+confirmó que vectorizar por sí solo no basta: el handler reentra en la ranura
+vacía hasta la guarda de recursión. La recuperación específica del callback se
+añadió después y ambas variantes se reconstruyeron. Validación funcional y
+comparación con Beetle siguen pendientes.
 
-**Prueba pendiente con el fix actualizado:** `INICIAR_FINAL_BOUT_NATIVO.bat`
-(fail-fast activo), Little Goku vs Piccolo. Registrar si la transición sigue, si
-aparece un `psx_crash.txt` nuevo o si el juego se cuelga. No asumir de antemano
-que el manejador atiende la RI correctamente. Si se cuelga, usar temporalmente
-`INICIAR_FINAL_BOUT_SEGURO.bat` y conservar el informe para análisis.
+**Resultado de la prueba del 2026-09-26:** `INICIAR_FINAL_BOUT_NATIVO.bat`
+volvió a colgarse al elegir Little Goku contra Piccolo. El dump
+`build-release/psx_freeze_dump_psx-runtime_1790440947_0.json` confirma frame 2214,
+`EPC=0x2030`, `Cause=0x428`, `SR=0x40020400`, `in_exception=1` y 902 bloqueos de
+reentrada. La traza repite `0x1F6C -> 0x80000080 -> 0x27AC -> 0x2818`: el fix RI
+sí vectorizó, pero el handler no descartó la llamada stale; el heartbeat cerró
+con `dispatch recursion guard tripped`.
+
+**Corrección de seguimiento compilada:** en `dirty_ram_interp.c`, si una entrada
+interpretada de RAM baja (`0x1000..0xFFFF`) consiste solo en NOPs y alcanza una RI,
+y el `$ra` del llamador es exactamente `0x293C` o `0x2950` (los dos retornos
+`jalr` del walker de IRQ verificado), se trata como callback vacío: `v0=0` y
+retorno al walker. Así puede seguir al siguiente nodo en lugar de volver a
+ejecutar la ranura borrada. Cualquier otra RI mantiene la ruta normal de
+excepción. Build normal y PGXP enlazadas; `python tools\\verify_offline.py` pasa.
+
+**Siguiente ejecución diagnóstica:** volver a usar `INICIAR_FINAL_BOUT_NATIVO.bat`
+en la siguiente sesión normal. El juego ya superó manualmente la transición;
+ahora comparar `empty_irq_callback_returns` con los counters de errores para
+confirmar si esa ruta se tomó y asegurar que el síntoma no reapareció.
+
+**Playtest satisfactorio posterior (2026-09-26):** el usuario informa que pudo
+completar Piccolo vs Goku y entrar sin problemas en el segundo combate Piccolo vs
+Little Goku Super Saiyan. Los artefactos locales de la última ejecución normal
+son `psx_last_run_report.json` y `psx_freeze_heartbeat.json` (cierre de ventana,
+frame 5438; heartbeat frame 5437): `fatal=null`, `unknown_dispatch_tail.total=0`,
+`interp_unsupported.midblock_count=0`, heartbeat sin dumps automáticos/fallidos,
+`in_exception=0`, y el dump asociado a esa sesión no es el anterior. Hubo 69
+snapshots de overlay en el historial de sesión (78 regiones, incluidas páginas
+del rango de STEP40 `0x80060000..0x8006E000`). El informe refleja
+`disp_native=0`, `disp_interp=1618550`, así que el gameplay observado seguía
+siendo interpretado; el resultado estable no se debió a DLLs nativos nuevos.
+
+El heartbeat de esa sesión ya fue reemplazado por una ejecución posterior y no
+contiene todavía el contador específico de la recuperación (`not-recorded`). Por
+eso el playtest es evidencia fuerte y congruente con la ruta corregida, pero no
+permite atribuir causalidad con certeza. Desde esta build,
+`empty_irq_callback_returns` en el
+heartbeat/reporte final y `python tools\\analyze_latest_session.py` permitirán
+confirmar cuántas veces se tomó la recuperación en cada sesión. Los snapshots de
+overlay incluyen bytes del disco local; conservarlos localmente y no publicarlos.
 
 **Riesgos pendientes de validar:**
 - El fallo ocurre con `in_exception = 1`: levantar otra excepción anida en el
@@ -327,10 +370,11 @@ Estado verificado y reutilizable:
 
 Siguiente trabajo (en orden, sin saltarse pasos):
 
-1. **Validar el build actualizado en una ejecución de combate estable.** Los
-   diagnósticos T1/T2 ya identificaron la causa y el fix se compiló; falta la
-   prueba manual descrita en §3.2. Sin ella no hay *ground truth* nuevo de input
-   lag ni de tiempos de recuperación.
+1. **Establecer línea base Tier 1** — la transición a la segunda pelea ya se
+   confirmó manualmente. Falta capturar una sesión nueva con el contador
+   `empty_irq_callback_returns`; documentar peleas, overlays y errores. La prueba
+   actual confirma estabilidad de una secuencia, no ground truth de input lag ni
+   tiempos de recuperación.
 2. **Plugin de observación (Tier 1)** — solo lectura, sin escrituras de gameplay:
    - registrar `pad` muestreado y transiciones de flanco;
    - hooks `function_entry` en las fronteras verificadas de `STEP40`;

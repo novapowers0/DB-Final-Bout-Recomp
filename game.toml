@@ -30,6 +30,14 @@ known_sha1 = [
 seeds = "seeds/ghidra_funcs.txt"
 out_dir = "generated"
 strict = true
+# Trusted opt-in hooks for the dbfb.responsive plugin (src/mods/dbfb_responsive.c).
+# Both are real prologues in the STEP40 lower region, verified against live RAM
+# (INFORME_CLAUDE.md section 5). The callbacks fail closed if the code differs.
+# NOTE: these are OVERLAY addresses (not in the base EXE text), so the EXE
+# recompile emits no function-entry calls for them; they fire only when the
+# STEP40 overlay runs (native or interpreted). They are recorded here so the
+# overlay codegen keeps the hooks wired.
+mod_function_entry_funcs = ["0x8003FCF0", "0x8003FE68"]
 
 [runtime]
 window_title = "DBFinalBout Recompiled"
@@ -138,9 +146,12 @@ sio_no_tx_gate = true
 [[overlays]]
 load_addr = "0x80060000"
 function_entry_pcs = [
-  "0x8006026C", "0x8006053C", "0x80060BA4", "0x80060DC8", "0x80061120",
-  "0x80061214", "0x80061830", "0x80061A08", "0x80061ABC", "0x80061B30",
-  "0x800620FC", "0x80065F1C", "0x80065FCC", "0x8006639C", "0x80066A6C",
+  "0x8006026C", "0x8006053C", "0x800605D4", "0x80060714", "0x80060828",
+  "0x800609C0", "0x80060B00", "0x80060BA4", "0x80060DC8", "0x80060F1C",
+  "0x800610A4", "0x80061120", "0x80061214", "0x80061830", "0x80061A08",
+  "0x80061ABC", "0x80061B30", "0x80061DDC", "0x800620FC", "0x80062BD0",
+  "0x80062C6C", "0x80062C98", "0x80062CAC", "0x80062D00", "0x8006368C",
+  "0x800638AC", "0x80065F1C", "0x80065FCC", "0x8006639C", "0x80066A6C",
   "0x80066FBC", "0x80067148", "0x80067288", "0x80067290", "0x800677C4",
   "0x800678D0", "0x800680A4", "0x8006829C", "0x80068314", "0x80068D40",
   "0x80068D6C", "0x80068E18", "0x80069228", "0x800693C0", "0x800693CC",
@@ -152,10 +163,11 @@ function_entry_pcs = [
   "0x8006C14C", "0x8006C220", "0x8006C274", "0x8006C330", "0x8006C470",
   "0x8006C8E8", "0x8006C940", "0x8006C98C", "0x8006CA30", "0x8006CA38",
   "0x8006CA70", "0x8006CA7C", "0x8006CB40", "0x8006CBD4", "0x8006CC70",
-  "0x8006CCBC", "0x8006CD4C", "0x8006CE4C", "0x8006D124", "0x8006D174",
-  "0x8006D180", "0x8006D460", "0x8006D46C", "0x8006D784", "0x8006DB0C",
-  "0x8006DF08", "0x8006DF14", "0x8006E100", "0x8006E108", "0x8006E2F8",
-  "0x8006E5FC", "0x8006E6C4", "0x8006E6D0", "0x8006EADC",
+  "0x8006CC7C", "0x8006CCBC", "0x8006CD4C", "0x8006CE4C", "0x8006D124",
+  "0x8006D174", "0x8006D180", "0x8006D460", "0x8006D46C", "0x8006D784",
+  "0x8006DB0C", "0x8006DF08", "0x8006DF14", "0x8006E100", "0x8006E108",
+  "0x8006E2F8", "0x8006E4F4", "0x8006E5FC", "0x8006E6C4", "0x8006E6D0",
+  "0x8006EADC",
 ]
 
 # STEP40 battle overlay at the 0x80068000-bucket variant (dirty-run recovery
@@ -223,6 +235,48 @@ function_entry_pcs = [
 load_addr = "0x80056000"
 function_entry_pcs = [
   "0x800569DC", "0x80056E48",
+]
+
+# STEP40 battle overlay, lower part 0x8003E000..0x8005FFFF (2026-10-03). The
+# fight overlay streams from 0x8003E7F0 up to 0x80072520; only the 0x80060000+
+# part was declared before, so the render/animation code below it (e.g. the
+# 0x8004020C routine, about 14 percent of interpreted instructions in a fight)
+# stayed interpreted. Every entry is a strict `addiu sp,sp,-N` prologue that
+# (a) was executed (executed_pcs of the durable capture store, bytes identical
+# to the live fight RAM) and (b) has at least one `jal` caller in the live
+# fight RAM. Prologues without a jal caller (28) are deliberately NOT declared:
+# precision > recall. (The render routine at 0x80054684 IS declared below; the
+# earlier note that omitted it was superseded - see INFORME_CLAUDE.md section
+# 4.3.)
+[[overlays]]
+load_addr = "0x8003E000"
+function_entry_pcs = [
+  "0x8003ED04", "0x8003F7BC", "0x8003F944", "0x8003FB40", "0x8003FCF0",
+  "0x8003FE68", "0x8004020C", "0x800402D4", "0x80040400", "0x8004097C",
+  "0x80040F40", "0x80041084", "0x80041204", "0x8004135C", "0x80041514",
+  "0x80041658", "0x800417D8", "0x80041984", "0x80041B88", "0x80041E90",
+  "0x80041EF4", "0x8004201C", "0x8004216C", "0x800421E8", "0x80042240",
+  "0x800422C8", "0x80043090", "0x800430C4", "0x80043134", "0x8004329C",
+  "0x80043338", "0x80043CA8", "0x8004477C", "0x80044824", "0x80044D74",
+  "0x80044E6C", "0x80044FE8", "0x80045294", "0x80045548", "0x80045D4C",
+  "0x800469C4", "0x80047040", "0x800476C0", "0x8004778C", "0x800479D4",
+  "0x80047D60", "0x80047E48", "0x80047FE8", "0x80048464", "0x80049728",
+  "0x80049F88", "0x8004A7A8", "0x8004A99C", "0x8004AB14", "0x8004AE20",
+  "0x8004B7E0", "0x8004C388", "0x8004C884", "0x8004CE50", "0x8004D4A4",
+  "0x8004D658", "0x8004DC80", "0x8004DEFC", "0x8004E0BC", "0x8004E530",
+  "0x8004EF08", "0x8004F014", "0x8004FEB8", "0x8005015C", "0x80050280",
+  "0x800504BC", "0x800506C8", "0x80050884", "0x800516FC", "0x80051A60",
+  "0x800523D0", "0x800524D4", "0x800525A0", "0x80052708", "0x80052710",
+  "0x80052740", "0x800527E0", "0x80052840", "0x800528A4", "0x80052958",
+  "0x8005297C", "0x80052A28", "0x80052AE0", "0x800530E0", "0x80053188",
+  "0x80053194", "0x80053200", "0x8005333C", "0x80053408", "0x8005368C",
+  "0x800537E0", "0x8005388C", "0x80054684", "0x80055848", "0x800569DC",
+  "0x80056E54", "0x800581AC", "0x80058394", "0x8005852C", "0x800586A0",
+  "0x800588F8", "0x80058A4C", "0x80058B8C", "0x80058C68", "0x80058DB0",
+  "0x80058E7C", "0x80058FA0", "0x80059194", "0x8005998C", "0x80059A84",
+  "0x8005A1FC", "0x8005A338", "0x8005BD1C", "0x8005C768", "0x8005CF9C",
+  "0x8005D264", "0x8005E1F0", "0x8005E330", "0x8005E4F4", "0x8005E6EC",
+  "0x8005F014", "0x8005F16C", "0x8005F2C4", "0x8005FC44", "0x8005FF9C",
 ]
 
 # Online mount gate: digests + track count + optional TOC fingerprint

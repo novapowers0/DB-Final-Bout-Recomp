@@ -50,7 +50,17 @@ psxrecomp_add_game_runtime(psx-runtime
     GEN_MARKER "generated/SLUS_004.93_dispatch.c"
     GEN_FULL_GLOB "generated/SLUS_004.93_full_*.c"
     CODEGEN_SETUP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/codegen_setup.c"
+    PRELOADED_MODS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mods/preloaded"
 )
+
+# Trusted game-owned combat plugin (dbfb.responsive). Linked into the Final Bout
+# targets only, never into the generic runtime. All features default to off.
+foreach(_dbfb_tgt psx-runtime psx-runtime-pgxp)
+    if(TARGET ${_dbfb_tgt})
+        target_sources(${_dbfb_tgt} PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/dbfb_responsive.c")
+    endif()
+endforeach()
 
 # Stage runtime configs next to the exe for direct build/ launches. Only copy
 # files that exist — never fail POST_BUILD when game_options.toml is absent.

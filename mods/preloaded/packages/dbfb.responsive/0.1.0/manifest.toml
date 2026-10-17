@@ -1,0 +1,72 @@
+format_version = 6
+id = "dbfb.responsive"
+version = "0.1.0"
+name = "Final Bout Responsive Combat"
+author = "NovaPowers"
+description = "Default-off, offline-only combat input experiments for the verified USA input path. Original performs no input writes or allocations. Fighter state, recovery, hit-stop and balance are not modified."
+license = "PolyForm-Noncommercial-1.0.0"
+resolver = "declarative"
+
+[[target]]
+game_id = "SLUS-00493"
+
+# Tier 1: read-only. Samples both pads (raw SIO word + press edges) every guest
+# VBlank while the verified combat poll path is active, into a lazy ring in
+# plugin-owned Expansion-1 memory (read_ram). Never writes gameplay memory.
+[[feature]]
+id = "trace"
+name = "Combat trace (read-only)"
+description = "Offline only. Records verified combat polls, pad samples and press edges for input timing analysis. Writes only to its own diagnostic ring, never to gameplay state. Independent of input assistance."
+group = "Combat"
+default_enabled = false
+channel = "developer"
+
+[[plugin]]
+feature = "trace"
+id = "dbfb.responsive.trace"
+
+# Tier 2: two mutually exclusive, honestly named input experiments. The buffer
+# catches taps BETWEEN polls; it cannot wait for an unknown recovery state.
+# No netplay/rollback serialization: callbacks actively refuse online/resim.
+[[feature]]
+id = "input-buffer"
+name = "Combat input assistance (offline experiment)"
+description = "Offline only. Catch a short face/shoulder tap between polls once, or explicitly choose a bounded hold extension. Only the verified combat input stack word is changed. No directions or menu buttons are synthesized. START/SELECT suspends assistance until the combat code context leaves or a new activation; combat feel still needs playtesting."
+group = "Combat"
+default_enabled = false
+channel = "experimental"
+
+[[option]]
+feature = "input-buffer"
+id = "mode"
+label = "Input mode"
+description = "Original is inert. Tap buffer delivers a missed sampled press once; it is not a recovery/command buffer. Hold extension is a separate experiment."
+type = "choice"
+default = "buffer"
+
+[[option.choice]]
+value = "original"
+label = "Original (no assistance)"
+
+[[option.choice]]
+value = "buffer"
+label = "Tap buffer between input polls"
+
+[[option.choice]]
+value = "hold"
+label = "Bounded hold extension"
+
+[[option]]
+feature = "input-buffer"
+id = "window"
+label = "Lifetime (guest VBlanks)"
+description = "1–6 guest VBlanks, including the press sample. Buffer expires when its age reaches this value; hold duration starts at the raw poll rising edge and never restarts while held. This replaces the old extra-polls setting."
+type = "integer"
+min = 1
+max = 6
+step = 1
+default = 2
+
+[[plugin]]
+feature = "input-buffer"
+id = "dbfb.responsive.input-buffer"

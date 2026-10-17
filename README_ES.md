@@ -165,10 +165,12 @@ por Git.
 ### v0.1.1
 
 Release de mantenimiento: se actualizaron los submodulos `psxrecomp` y
-`recomp-ui`, y se reconstruyo el paquete setup-host. `psxrecomp` incluye la
-integracion de upstream y el fix de Reserved Instruction para el dispatch de la
-transicion a combate. La nueva build compila correctamente; la transicion
-Little Goku contra Piccolo aun requiere validacion manual dentro del juego.
+`recomp-ui`, se reconstruyo el paquete setup-host y se añadio una recuperacion
+acotada para un callback IRQ vacio y obsoleto. Una sesion manual completo
+Piccolo contra Goku y avanzo al combate contra Little Goku Super Saiyan sin
+cuelgue. Los logs de esa sesion son anteriores al nuevo contador del callback,
+asi que no prueban si se ejecuto esa recuperacion; el resultado solo cubre esa
+secuencia probada y no garantiza que nunca haya cuelgues.
 
 Pins de frameworks: `psxrecomp` `7d70880d` (`rework-master`), `recomp-ui`
 `01bff947` y el submodulo anidado `recomp-net` `c2338c63`.

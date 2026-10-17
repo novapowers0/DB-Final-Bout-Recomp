@@ -1,5 +1,76 @@
 # DBFinalBout Recomp — Session Summary
 
+## 2026-10-03: release v0.1.1 actualizada in situ y handoff a Claude
+
+- Se reconstruyó el paquete setup-host `dbfb-0.1.1-setup-host-win64.zip` con el
+  árbol actual (runtimes `0.1.1`, recuperación del callback IRQ y contador
+  `empty_irq_callback_returns`) y se **reemplazó el asset del release existente
+  `v0.1.1`** con `gh release upload --clobber`, sin crear tag ni borrador. Las
+  notas se actualizaron con `gh release edit --notes-file`.
+- Asset único resultante: 33.060.246 bytes, SHA-256
+  `5c74dbaff2744ace0396ba1be38b4a00982cb803f1d0824b6a6b24d625d23f53`,
+  0 descargas. `verify_offline.py` y la prueba de integridad del ZIP pasan; no
+  contiene imagen de disco ni dump retail de BIOS.
+- El wrapper de empaquetado ahora incluye `baserom.md` y `mods/` (dejó de listar
+  `launcher_assets`, que estaba vacío). `mods/bundled` es necesario para el
+  catálogo de mods.
+- Entorno: el packager bash necesita `zip`/`rsync`/`python3`, ausentes en el Git
+  Bash del equipo. Se documentó la alternativa (7-Zip/Compress-Archive y
+  `C:\Python314\python.exe`) y `PSXRECOMP_RUNTIME_BIN_DIR` para las DLLs
+  `libc++.dll`/`libunwind.dll`.
+- Documentación de la entrega creada/actualizada: `MEMORY.md` (memoria durable),
+  `HANDOFF_CLAUDE.md` (misión Fases A/B), `AGENTS.md` §7/§11/§13/§14 (estado y
+  referencias). El handoff pide a Claude dejar todo funcional de extremo a
+  extremo y construir un mod de combate renovado tomando
+  `guimaraf/plusalpha-recomp` como referencia conductual, documentando el
+  trabajo en `INFORME_CLAUDE.md`. Commit/push los haremos nosotros.
+- Sigue pendiente la sesión nueva instrumentada que confirme
+  `empty_irq_callback_returns`; y la cobertura nativa completa del combate.
+
+## 2026-09-26: playtest Piccolo estable y diagnóstico de recuperación
+
+- El usuario completó **Piccolo vs Goku** y confirmó que la transición al
+  segundo combate **Piccolo vs Little Goku Super Saiyan** avanzó sin colgarse.
+- Artefactos locales de la ejecución cerrada normalmente: `psx_last_run_report.json`
+  (frame 5438, `reason=atexit`, `exit_origin=sdl_window_close`, `fatal=null`) y
+  `psx_freeze_heartbeat.json` (frame 5437, `fatal=null`, cero dumps automáticos
+  fallidos, `in_exception=0`, `dirty_ram_insns=321715503`). El reporte trae
+  `unknown_dispatch_tail.total=0`, `interp_unsupported.midblock_count=0` y
+  `dispatch_depth=1` al cierre. El dump fatal de frame 2214 es de la prueba
+  anterior, no de la sesión estable.
+- El historial de overlay conserva 69 snapshots/78 regiones de la sesión, con
+  actividad de combate STEP40 en `0x80060000..0x8006E000`. El reporte indica
+  `disp_native=0`, `disp_interp=1618550`: la ruta de combate observada aún fue
+  interpretada, no cambió por nuevos DLL nativos.
+- El éxito concuerda con el fallback estrecho añadido para la ranura vacía del
+  walker de IRQ, pero los artefactos previos no traen un contador específico y
+  por sí solos no demuestran causalidad.
+- Refuerzo diagnóstico: contador `g_dirty_ram_empty_irq_callback_returns`,
+  exportado como `empty_irq_callback_returns` en heartbeat e informe final;
+  `tools/analyze_latest_session.py` lo muestra en la próxima ejecución. Esto
+  permitirá verificar que el callback fue descartado y a la vez que no hubo
+  unsupported opcode ni dispatch desconocido.
+- Los snapshots capturados tienen bytes del disco del usuario; son artefactos
+  locales y no deben publicarse. No se usaron como raíces para recompilar.
+
+## 2026-09-26: Piccolo repro y seguimiento del fix RI
+
+- El usuario probó `INICIAR_FINAL_BOUT_NATIVO.bat` con Little Goku vs Piccolo y
+  el juego volvió a colgarse. El dump nuevo es
+  `build-release/psx_freeze_dump_psx-runtime_1790440947_0.json` (frame 2214).
+- El fix RI anterior sí vectorizó desde `0x2030` a `0x80000080`, pero el manejador
+  volvió al walker, que llamó otra vez la ranura borrada `0x1F6C`. La secuencia
+  `0x1F6C -> 0x80000080 -> 0x27AC -> 0x2818` se repitió hasta que la guarda de
+  recursión detuvo el juego (`exception_reentry_blocks=902`).
+- Seguimiento en `psxrecomp/runtime/src/dirty_ram_interp.c`: una ejecución que
+  empieza en RAM baja `0x1000..0xFFFF`, contiene solo NOPs y produce RI, con `$ra`
+  igual al retorno de `jalr` del walker (`0x293C` o `0x2950`), se trata como
+  callback vacío; devuelve `v0=0` y retoma el walker. Las demás RI conservan el
+  comportamiento de excepción.
+- Runtimes normal y PGXP reconstruidos. `python tools\\verify_offline.py` pasa;
+  el juego no se lanzó desde el agente. La nueva prueba manual de Little Goku vs
+  Piccolo aún está pendiente.
+
 ## 2026-09-26: frameworks actualizados y documentación de estado
 
 - `psxrecomp`: merge upstream master en `rework-master`, commit `7d70880d`
@@ -784,3 +855,7 @@ usuario será la primera comprobación funcional.
   durante el sellado local, por lo que el runtime las marca autoritativas, tal
   como documenta `rnet_rollback.c`. No se alteró la lógica de rollback para
   satisfacer expectativas obsoletas; queda como tarea upstream separada.
+
+## 2026-10-04: sesión autónoma Fase A/B (Claude)
+
+Ver `INFORME_CLAUDE.md`. Causa de `disp_native=0` (desajuste de hash de caché cg10/cg13), cobertura STEP40 baja y callbacks por evidencia `jal/jalr`, recuperación IRQ generalizada (sin verificar), plugin `dbfb.responsive` (trace + input-buffer experimental), `verify_offline.py` corregido.

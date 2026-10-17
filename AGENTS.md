@@ -21,9 +21,13 @@ Esos congelamientos **no eran crashes nativos** sino **freezes del intérprete**
 cargados en runtime, y sin cache nativo ese código corría 100% interpretado.
 
 Estado del proyecto (2026-09-26): los submódulos se actualizaron y la build
-Release volvió a compilar correctamente. El fix de Reserved Instruction para la
-transición a combate está integrado, pero **todavía falta validarlo jugando**
-Little Goku contra Piccolo. No dar la transición por resuelta hasta esa prueba.
+Release volvió a compilar correctamente. Tras reproducir el bucle de excepción
+anterior se añadió una recuperación estrecha para la ranura vacía del callback
+IRQ. El usuario confirmó un combate Piccolo vs Goku y el paso al segundo combate
+Piccolo vs Little Goku Super Saiyan. La sesión cerró normalmente sin fatal,
+unknown dispatch ni RI mid-block. El contador `empty_irq_callback_returns` queda
+ahora en heartbeat/reporte para confirmar el uso de esa ruta en futuras sesiones.
+No prometer estabilidad universal; continuar observando al ampliar el juego.
 
 ---
 
@@ -44,15 +48,32 @@ declarar fronteras de overlay, usa **solo** prólogos reales de función
 - **MSYS2 gcc:** `C:\msys64\mingw64\bin\gcc.exe` (compila los shards DLL de overlays
   y el recompilador). Añadir `C:\msys64\mingw64\bin` al PATH si algo falla en silencio.
 - **Toolchain pack (clang/llvm_mingw)** usado para el build final del exe:
-  `C:\Users\javie\.local\share\retcomm\toolchains\cmake-clang-v1\1.0.14`.
-- **Python:** se invoca `python` directamente (scripts de `psxrecomp/tools/`).
+  `C:\Users\javie\.local\share\retcomm\toolchains\cmake-clang-v1\1.0.14`. Sus
+  binarios `x86_64-w64-mingw32\bin` aportan `libc++.dll` y `libunwind.dll` que
+  el packager necesita copiar junto a `psxrecomp-game.exe`.
+- **Python:** se invoca `python` directamente en PowerShell; en el **Git Bash**
+  hay que usar la ruta real `C:\Python314\python.exe` (el alias de Windows Store
+  resuelve `python3` en PowerShell pero no dentro de Git Bash, y el empaquetador
+  llama `python3`). Para scripts bash del packager, define antes
+  `python3(){ /c/Python314/python.exe "$@"; }`.
+- **Empaquetado de release (setup-host):**
+  `scripts/package_setup_release.sh build-release setup-host-win64 build-recompiler`
+  → escribe `dist/dbfb-<VERSION>-<tag>.zip`. El shell del packager necesita
+  `zip`, `rsync` y `python3`, pero el Git Bash de este equipo **no trae `zip` ni
+  `rsync`**. Alternativas para la compresión: `C:\Program Files\7-Zip\7z.exe` o
+  `Compress-Archive` de PowerShell. Si el packager falla con
+  `required DLL missing for psxrecomp-game.exe: libc++.dll`, fija
+  `PSXRECOMP_RUNTIME_BIN_DIR` al bin de mingw del toolchain clang
+  (`.../1.0.14/x86_64-w64-mingw32/bin`).
 - **Submódulos fijados (2026-09-26):** `psxrecomp` `7d70880d` (fork
   `rework-master`, con upstream master integrado), `recomp-ui` `01bff947` y el
   submódulo anidado `psxrecomp/lib/recomp-net` `c2338c63`.
-- **Validación posterior a la actualización:**
+- **Validación de build del seguimiento RI (2026-09-26):**
   `ninja -C build-release DBFinalBout_Recompiled.exe` compiló y enlazó con
-  Ninja/clang. La prueba manual de transición Little Goku vs Piccolo sigue
-  pendiente; compilación correcta no equivale a validación in-game.
+  Ninja/clang; el target `ninja -C build-release` también enlazó la variante
+  PGXP. `python tools\\verify_offline.py` pasa. La prueba manual de transición
+  Little Goku vs Piccolo sigue pendiente; compilación correcta no equivale a
+  validación in-game.
 - **Dependencia local de libchdr** (offline): `deps/libchdr`. Persistida en
   `build-release\CMakeCache.txt` vía `FETCHCONTENT_SOURCE_DIR_PSX_LIBCHDR` — **no
   perder** ese override o el "Generate & rebuild" intentará fetch de red.
@@ -178,6 +199,22 @@ basura ajena al proyecto, **ignorar**.
   con Vulkan/netplay; debe repetirse el smoke test antes de considerar esas
   capacidades funcionalmente confirmadas.
 
+### Release v0.1.1 actualizado (2026-10-03)
+- La release existente `v0.1.1` (tag `bc69be7`, 0 descargas) se actualizó **in
+  situ**: se reemplazó el asset con `gh release upload --clobber` y las notas con
+  `gh release edit --notes-file`. No se creó un tag nuevo ni un borrador.
+- Asset único: `dbfb-0.1.1-setup-host-win64.zip`, 33.060.246 bytes, SHA-256
+  `5c74dbaff2744ace0396ba1be38b4a00982cb803f1d0824b6a6b24d625d23f53`. Contiene
+  los runtimes normal/PGXP `0.1.1`, la recuperación del callback IRQ, el contador
+  `empty_irq_callback_returns` y `mods/bundled`; **sin** imagen de disco ni dump
+  retail de BIOS. `verify_offline.py` y la prueba de integridad del ZIP pasan.
+- El paquete ahora incluye `baserom.md` y `mods/` (el script dejó de listar
+  `launcher_assets`, que estaba vacío). Cambio inocuo; `mods/bundled` es
+  necesario para el catálogo de mods.
+- La secuencia confirmada (Piccolo vs Goku → Piccolo vs Little Goku SS) sigue
+  siendo la evidencia; falta una sesión nueva con el contador para saber si la
+  ruta de recuperación se ejecutó.
+
 ### Bugs visuales pendientes en combate (reporte del usuario, 19/08)
 1. **Sombras 3D defectuosas** ("como en la lejanía") — diagnosticado como problema
    de **proyección de profundidad/Z del PORT BASE** (no del widescreen). Aparece con
@@ -271,15 +308,20 @@ cmake --build build-release --target psx-runtime
 
 ## 11. Siguientes pasos (priorizados)
 
-1. **Validar el fix de transición** con `INICIAR_FINAL_BOUT_NATIVO.bat`, Little
-   Goku contra Piccolo. Revisar que la transición continúe y que no aparezca un
-   `psx_crash.txt` nuevo. El build está compilado; el resultado de esta prueba
-   manual sigue pendiente. Si se cuelga, probar el modo seguro y conservar los
-   diagnósticos para investigar la entrega de IRQ durante la reconstrucción de
-   la tabla de handlers. Ver `PLAN_SOLUCION_CRASH_Y_COMBATE.md` §3.2.
-2. Tras validar la transición, re-testear el combate nativo, el segundo combate
-   (retrato rival y ausencia de pantalla negra) y el widescreen 16:9. Usar
-   `stall_report.py --port 4370 snap` para comparar dispatch nativo e intérprete.
+> El plan operativo detallado —incluida la fase de mod de combate— vive en
+> `HANDOFF_CLAUDE.md`. Aquí solo el orden de alto nivel.
+
+1. **Sesión nueva instrumentada** con `INICIAR_FINAL_BOUT_NATIVO.bat` (la
+   secuencia de transición ya se confirmó sin cuelgue el 2026-09-26). Al cerrar,
+   `python tools\analyze_latest_session.py` y comprobar
+   `empty_irq_callback_returns` (hoy `not-recorded`), `unknown_dispatch_tail=0`,
+   `interp_unsupported.midblock_count=0` y ausencia de `psx_freeze_dump_*`
+   nuevos. Conservar los artefactos si algo falla. Ver
+   `PLAN_SOLUCION_CRASH_Y_COMBATE.md` §3.2.
+2. **Cobertura nativa real del combate:** el playtest estable seguía con
+   `disp_native=0` / `disp_interp=1.618.550`. Recompilar el STEP40 completo con
+   captura fresca y confirmar con `stall_report.py --port 4370 snap` que el
+   combate corre nativo antes de tocar el combate.
 3. **Sombras 3D defectuosas:** es del port base (proyección Z). Investigar a fondo
    si hay parámetro/sitio en `psxrecomp` (PGXP, `ws_far_threshold`,
    `geometry_correction`) que lo corrija — o documentar como limitación del port.
@@ -341,3 +383,43 @@ ese fallo aislado como motivo para cambiar el protocolo.
   interpretada o mal compilada; investigar antes de seguir.
 - Al final de cada sesión, actualiza `summary.md` (y este AGENTS.md si cambian
   comandos/estado clave).
+
+---
+
+## 13. Documentos de esta entrega (leer en este orden)
+
+1. `MEMORY.md` — memoria durable y destilada: identidad del proyecto, lecciones
+   que costaron sesiones, pins, comandos y prohibiciones. **Leer primero.**
+2. `AGENTS.md` (este documento) — guía de arquitectura, pipeline y estado.
+3. `HANDOFF_CLAUDE.md` — misión de la siguiente fase: (A) dejar el juego
+   funcional de extremo a extremo y (B) construir un **mod de combate renovado**
+   inspirado en `guimaraf/plusalpha-recomp` (Street Fighter EX Plus Alpha),
+   usando el disco/EXE/STEP40 como referencia de ingeniería inversa.
+4. `PLAN_SOLUCION_CRASH_Y_COMBATE.md` — diagnóstico del crash de transición y
+   hoja de ruta del combate "Responsive Edition" (Tiers 0–4).
+5. `summary.md` — registro cronológico de sesiones.
+
+## 14. Material de referencia del combate
+
+- **Disco de Final Bout (referencia de RE):** `disc/` (EXE `SLUS_004.93` y
+  overlays `STEP*.BIN`; el de combate es `STEP40.BIN`, miembro en offset
+  `0x22060`, base RAM `0x80060000`). Las fronteras de función verificadas ya
+  están en `game.toml`.
+- **`guimaraf/plusalpha-recomp` (referencia conductual, NO de transplante):**
+  port de *Street Fighter EX Plus Alpha* (SLUS-00548) sobre el mismo
+  `psxrecomp`. Aporta un ejemplo real de juego de lucha funcionando (Software
+  1x, 60 FPS, LLE SCPH-1001) y patrones de temporización de luchadores. Su
+  framework es `guimaraf/psxrecomp-plusalpha`. Leer su README y sus docs; sirve
+  para diseño de input/hit-stop/cámara, **no** para copiar su modelo 2D en el
+  motor 3D de Final Bout (ver `FINAL_BOUT_RESPONSIVE_ARCHITECTURE.md`).
+  - Hay una copia con documentación de Final Bout en
+    `..\DB Final Bout\tools\psxrecomp\` (incluye
+    `docs/FINAL_BOUT_RESPONSIVE_ARCHITECTURE.md`).
+  - En `disc/` hay además `Street Fighter EX Plus Alpha (USA).bin` — material
+    ajeno útil solo como referencia/oráculo; **ignorar** para el build.
+- **Punto de integración del mod:** `psxrecomp/runtime/include/mod_plugins.h`
+  (plugins confiables por id), `psxrecomp/docs/MOD_PACKAGES.md` (manifiestos v6)
+  y `mods/preloaded/packages/<id>/<version>/manifest.toml`. El plugin nativo se
+  enlaza en el target de Final Bout (`PSXRT_EXTRAS_SOURCES` vía
+  `psxrecomp_add_game_runtime`, ya usado con `codegen_setup.c`), nunca en
+  `runtime.cmake` genérico.

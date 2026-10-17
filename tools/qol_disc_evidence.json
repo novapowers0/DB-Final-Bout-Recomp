@@ -1,0 +1,683 @@
+{
+  "schema": 1,
+  "read_only": true,
+  "discs": [
+    {
+      "source": "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DB Final Bout\\Dragon Ball GT - Final Bout (USA).cue",
+      "data_file": "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DB Final Bout\\Dragon Ball GT - Final Bout (USA).bin",
+      "data_file_size": 158811744,
+      "data_file_hashes": {
+        "md5": "2f869f926514278b72ffbd671e69b9f7",
+        "sha1": "8a2373f133788256cba64a1a0ba9fbb4b4667f71",
+        "sha256": "2f9d475fa089bed3f77a3344ea23af0663b30ffe9a2bc0b803bcae389480a15b"
+      },
+      "track_count": 1,
+      "toc_verified": false,
+      "index01_frames": 0,
+      "sector_stride": 2352,
+      "volume": "DRAGON_BALL_FB",
+      "serial": "SLUS-00493",
+      "region_hint": "NTSC-U",
+      "boot_path": "SLUS_004.93",
+      "boot": {
+        "size": 190464,
+        "sha256": "507f132cdcbb635bbbf7a75e15c62a9d0d51e22ce4432828da784ec03b67cbcc"
+      },
+      "entry_pc": "0x80010B98",
+      "load_address": "0x80010000",
+      "payload_size": 188416,
+      "payload_sha256": "4aaf50363762a03d0c50267880a21d770740c0118c77bb83c8063eade6935aa5",
+      "overlays": {
+        "MENU/STEP00.BIN": {
+          "size": 6568,
+          "sha256": "30262244d1ba9840e95fc9021ea4d08a8abc06a96c8a4918960709e35fc3ae54"
+        },
+        "MENU/STEP01.BIN": {
+          "size": 226452,
+          "sha256": "a65555d55ed6a9bb10111469b3d9a2d1e08906e1c8c6b895185f50c7c69a969c"
+        },
+        "MENU/STEP02.BIN": {
+          "size": 105680,
+          "sha256": "e77451ca7b18ae70878a32825c2ed855439911a1ee397afcc62c288af852b48c"
+        },
+        "MENU/STEP03.BIN": {
+          "size": 161368,
+          "sha256": "b5d3a557dbd3b51862477deb28b6b7adb5e5d6b36b4ea6af13fe6aa5cafcc364"
+        },
+        "MENU/STEP40.BIN": {
+          "size": 442876,
+          "sha256": "001adcdc2e129d3bd715c29b64e393fa8c2901a7ef39c2347874b321aae6b9dd"
+        },
+        "MENU/STEP999.BIN": {
+          "size": 51912,
+          "sha256": "99211a1bc53878c66865ffaa6b2b95b431415a314adb6eee6880624b82b06da9"
+        }
+      },
+      "runtime_compatibility": "NOT_VERIFIED"
+    },
+    {
+      "source": "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DB Final Bout\\Dragon Ball - Final Bout (E) [SLES-03735].bin",
+      "data_file": "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DB Final Bout\\Dragon Ball - Final Bout (E) [SLES-03735].bin",
+      "data_file_size": 162137472,
+      "data_file_hashes": {
+        "md5": "89022642b1435d3e3193484449065a93",
+        "sha1": "0f8f7c8ce61f2b92a278fd00ccdc2899df5014bf",
+        "sha256": "8967d8764dee89c9060983c017c2da83b05972154b7cf071a634596d73b2e7da"
+      },
+      "track_count": null,
+      "toc_verified": false,
+      "index01_frames": 0,
+      "sector_stride": 2352,
+      "volume": "DRAGON_BALL_FB",
+      "serial": "SLES-03735",
+      "region_hint": "PAL",
+      "boot_path": "SLES_037.35",
+      "boot": {
+        "size": 190464,
+        "sha256": "9ed186dd13132eb76ae87cbc70de37ee2ef99642b41a36440277385ea8f9b5da"
+      },
+      "entry_pc": "0x80010B98",
+      "load_address": "0x80010000",
+      "payload_size": 188416,
+      "payload_sha256": "327f5f87726805d0a1e31b5466be06cc19791e361948cd8fd0465253dc07d30a",
+      "overlays": {
+        "MENU/STEP00.BIN": {
+          "size": 7964,
+          "sha256": "94d50fc67a8a21456d8539b75cb6426961af50779c45370393964b6fc479ca7f"
+        },
+        "MENU/STEP01.BIN": {
+          "size": 227472,
+          "sha256": "74454744cab5a16170ff2489b43924418b3ec3a28f1f009f3844657f8a6600de"
+        },
+        "MENU/STEP02.BIN": {
+          "size": 107212,
+          "sha256": "ff1ec63d0f0dfae7c6bef74ad4ff73152e5ff4136d44092f74335b70e9faf85d"
+        },
+        "MENU/STEP03.BIN": {
+          "size": 164870,
+          "sha256": "abe789f7b143550d5aaf9ded1688122889f62776a04d136a150165959a891a4a"
+        },
+        "MENU/STEP40.BIN": {
+          "size": 442596,
+          "sha256": "127f357f65c8258dcbacae95f4d54ea5a29324148d9f082eda29e481673d13f0"
+        },
+        "MENU/STEP999.BIN": {
+          "size": 52064,
+          "sha256": "299e89eb29a9fe0870cb74437fa8f35d71f140be5be9474bd9e440d4c40335cb"
+        }
+      },
+      "runtime_compatibility": "NOT_VERIFIED"
+    },
+    {
+      "source": "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DB Final Bout\\Dragon Ball - Final Bout (Spain).cue",
+      "data_file": "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DB Final Bout\\Dragon Ball - Final Bout (Spain).bin",
+      "data_file_size": 162137472,
+      "data_file_hashes": {
+        "md5": "7b7863af5128e95cff870d6c48ad0da7",
+        "sha1": "00277d41d848e1c732bff5564c6d102aa15ebdd4",
+        "sha256": "af3fed689e070c524974e34c721677d744d0cacc8157a4647a24347dc39cae4d"
+      },
+      "track_count": 1,
+      "toc_verified": false,
+      "index01_frames": 0,
+      "sector_stride": 2352,
+      "volume": "DRAGON_BALL_FB",
+      "serial": "SLES-03685",
+      "region_hint": "PAL",
+      "boot_path": "SLES_036.85",
+      "boot": {
+        "size": 190464,
+        "sha256": "82959075cf67ee5a0927a2487a50c2826e4ee5403b327b3cd115afc52eb613d0"
+      },
+      "entry_pc": "0x80010B98",
+      "load_address": "0x80010000",
+      "payload_size": 188416,
+      "payload_sha256": "bf720fe4759f47f71cc56529e6f220d5c1239ba18b988c1d71a3b977b2e5feee",
+      "overlays": {
+        "MENU/STEP00.BIN": {
+          "size": 7964,
+          "sha256": "5e812823f8ac698fb7464063c915abf9128a105b9fdca4a8eb7515bd5bee4798"
+        },
+        "MENU/STEP01.BIN": {
+          "size": 228112,
+          "sha256": "2f1887b1d65175eb4b3799c2be867bb269621b226dbc3b4326c142c4409ed527"
+        },
+        "MENU/STEP02.BIN": {
+          "size": 107212,
+          "sha256": "b6d0c3299ce4b5ce0e28bf81f73c086b59a39e962b38d6db26f5f09541cd4567"
+        },
+        "MENU/STEP03.BIN": {
+          "size": 165634,
+          "sha256": "6813c9187ee3f6ab5a99d3a7629d9482efe0896f9e2a025fd2c8501f860f1929"
+        },
+        "MENU/STEP40.BIN": {
+          "size": 443068,
+          "sha256": "ee25553f4c61e69fe573450b7b529cf4a94734a6c8808a7ceff981c813d5f5e5"
+        },
+        "MENU/STEP999.BIN": {
+          "size": 52064,
+          "sha256": "299e89eb29a9fe0870cb74437fa8f35d71f140be5be9474bd9e440d4c40335cb"
+        }
+      },
+      "runtime_compatibility": "NOT_VERIFIED"
+    }
+  ],
+  "comparisons": [
+    {
+      "a": "SLUS-00493",
+      "b": "SLES-03735",
+      "boot": {
+        "identical": false,
+        "different_bytes": 116167,
+        "first_changed_offsets": [
+          113,
+          114,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129
+        ],
+        "last_changed_offset": 153299,
+        "size_delta": 0
+      },
+      "overlays": {
+        "MENU/STEP00.BIN": {
+          "identical": false,
+          "different_bytes": 3847,
+          "first_changed_offsets": [
+            4,
+            5,
+            8,
+            9,
+            12,
+            16,
+            20,
+            21,
+            24,
+            28,
+            32,
+            36,
+            40,
+            44,
+            56,
+            68
+          ],
+          "last_changed_offset": 3967,
+          "size_delta": 1396
+        },
+        "MENU/STEP01.BIN": {
+          "identical": false,
+          "different_bytes": 84767,
+          "first_changed_offsets": [
+            4,
+            5,
+            8,
+            9,
+            12,
+            16,
+            17,
+            20,
+            21,
+            24,
+            28,
+            29,
+            36,
+            40,
+            44,
+            45
+          ],
+          "last_changed_offset": 142663,
+          "size_delta": 1020
+        },
+        "MENU/STEP02.BIN": {
+          "identical": false,
+          "different_bytes": 44146,
+          "first_changed_offsets": [
+            4,
+            5,
+            8,
+            12,
+            13,
+            16,
+            20,
+            24,
+            25,
+            28,
+            29,
+            36,
+            37,
+            40,
+            41,
+            44
+          ],
+          "last_changed_offset": 72933,
+          "size_delta": 1532
+        },
+        "MENU/STEP03.BIN": {
+          "identical": false,
+          "different_bytes": 107256,
+          "first_changed_offsets": [
+            383,
+            401,
+            402,
+            403,
+            404,
+            405,
+            406,
+            407,
+            409,
+            410,
+            411,
+            412,
+            413,
+            414,
+            415,
+            416
+          ],
+          "last_changed_offset": 160439,
+          "size_delta": 3502
+        },
+        "MENU/STEP40.BIN": {
+          "identical": false,
+          "different_bytes": 180441,
+          "first_changed_offsets": [
+            12,
+            13,
+            16,
+            17,
+            20,
+            21,
+            24,
+            25,
+            28,
+            32,
+            33,
+            36,
+            40,
+            41,
+            44,
+            45
+          ],
+          "last_changed_offset": 441671,
+          "size_delta": -280
+        },
+        "MENU/STEP999.BIN": {
+          "identical": false,
+          "different_bytes": 21397,
+          "first_changed_offsets": [
+            4,
+            5,
+            8,
+            9,
+            12,
+            13,
+            16,
+            17,
+            20,
+            21,
+            24,
+            25,
+            28,
+            29,
+            32,
+            33
+          ],
+          "last_changed_offset": 51910,
+          "size_delta": 152
+        }
+      },
+      "overlays_only_a": [],
+      "overlays_only_b": [],
+      "code_identity": "NOT_PROVEN: EXE/overlay payloads mix code and data"
+    },
+    {
+      "a": "SLUS-00493",
+      "b": "SLES-03685",
+      "boot": {
+        "identical": false,
+        "different_bytes": 116167,
+        "first_changed_offsets": [
+          113,
+          114,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129
+        ],
+        "last_changed_offset": 153299,
+        "size_delta": 0
+      },
+      "overlays": {
+        "MENU/STEP00.BIN": {
+          "identical": false,
+          "different_bytes": 3847,
+          "first_changed_offsets": [
+            4,
+            5,
+            8,
+            9,
+            12,
+            16,
+            20,
+            21,
+            24,
+            28,
+            32,
+            36,
+            40,
+            44,
+            56,
+            68
+          ],
+          "last_changed_offset": 3967,
+          "size_delta": 1396
+        },
+        "MENU/STEP01.BIN": {
+          "identical": false,
+          "different_bytes": 85403,
+          "first_changed_offsets": [
+            4,
+            5,
+            8,
+            9,
+            12,
+            16,
+            17,
+            20,
+            21,
+            24,
+            28,
+            29,
+            36,
+            40,
+            44,
+            45
+          ],
+          "last_changed_offset": 142663,
+          "size_delta": 1660
+        },
+        "MENU/STEP02.BIN": {
+          "identical": false,
+          "different_bytes": 44146,
+          "first_changed_offsets": [
+            4,
+            5,
+            8,
+            12,
+            13,
+            16,
+            20,
+            24,
+            25,
+            28,
+            29,
+            36,
+            37,
+            40,
+            41,
+            44
+          ],
+          "last_changed_offset": 72933,
+          "size_delta": 1532
+        },
+        "MENU/STEP03.BIN": {
+          "identical": false,
+          "different_bytes": 108015,
+          "first_changed_offsets": [
+            383,
+            401,
+            402,
+            403,
+            404,
+            405,
+            406,
+            407,
+            409,
+            410,
+            411,
+            412,
+            413,
+            414,
+            415,
+            416
+          ],
+          "last_changed_offset": 160439,
+          "size_delta": 4266
+        },
+        "MENU/STEP40.BIN": {
+          "identical": false,
+          "different_bytes": 180411,
+          "first_changed_offsets": [
+            12,
+            13,
+            16,
+            17,
+            20,
+            21,
+            24,
+            25,
+            28,
+            32,
+            33,
+            36,
+            40,
+            41,
+            44,
+            45
+          ],
+          "last_changed_offset": 442847,
+          "size_delta": 192
+        },
+        "MENU/STEP999.BIN": {
+          "identical": false,
+          "different_bytes": 21397,
+          "first_changed_offsets": [
+            4,
+            5,
+            8,
+            9,
+            12,
+            13,
+            16,
+            17,
+            20,
+            21,
+            24,
+            25,
+            28,
+            29,
+            32,
+            33
+          ],
+          "last_changed_offset": 51910,
+          "size_delta": 152
+        }
+      },
+      "overlays_only_a": [],
+      "overlays_only_b": [],
+      "code_identity": "NOT_PROVEN: EXE/overlay payloads mix code and data"
+    },
+    {
+      "a": "SLES-03735",
+      "b": "SLES-03685",
+      "boot": {
+        "identical": false,
+        "different_bytes": 52,
+        "first_changed_offsets": [
+          116008,
+          116009,
+          116010,
+          116012,
+          116013,
+          116014,
+          116016,
+          116017,
+          116018,
+          116021,
+          116022,
+          116025,
+          116026,
+          116029,
+          116030,
+          116033
+        ],
+        "last_changed_offset": 116094,
+        "size_delta": 0
+      },
+      "overlays": {
+        "MENU/STEP00.BIN": {
+          "identical": false,
+          "different_bytes": 75,
+          "first_changed_offsets": [
+            6660,
+            6661,
+            6662,
+            6664,
+            6665,
+            6666,
+            6669,
+            6670,
+            6673,
+            6674,
+            6677,
+            6678,
+            6681,
+            6682,
+            6685,
+            6686
+          ],
+          "last_changed_offset": 6874,
+          "size_delta": 0
+        },
+        "MENU/STEP01.BIN": {
+          "identical": false,
+          "different_bytes": 998,
+          "first_changed_offsets": [
+            8992,
+            8993,
+            8994,
+            8995,
+            8996,
+            8997,
+            8998,
+            35484,
+            35540,
+            36216,
+            36217,
+            36219,
+            36220,
+            36221,
+            36222,
+            36223
+          ],
+          "last_changed_offset": 227471,
+          "size_delta": 640
+        },
+        "MENU/STEP02.BIN": {
+          "identical": false,
+          "different_bytes": 77,
+          "first_changed_offsets": [
+            51508,
+            51516,
+            106464,
+            106465,
+            106466,
+            106468,
+            106469,
+            106470,
+            106473,
+            106474,
+            106477,
+            106478,
+            106481,
+            106482,
+            106485,
+            106486
+          ],
+          "last_changed_offset": 106678,
+          "size_delta": 0
+        },
+        "MENU/STEP03.BIN": {
+          "identical": false,
+          "different_bytes": 3939,
+          "first_changed_offsets": [
+            709,
+            719,
+            721,
+            1190,
+            1191,
+            1324,
+            17484,
+            18244,
+            18392,
+            18464,
+            19092,
+            20804,
+            21632,
+            22900,
+            23040,
+            24492
+          ],
+          "last_changed_offset": 164869,
+          "size_delta": 764
+        },
+        "MENU/STEP40.BIN": {
+          "identical": false,
+          "different_bytes": 490,
+          "first_changed_offsets": [
+            97316,
+            97528,
+            97604,
+            97616,
+            97852,
+            97868,
+            98000,
+            98040,
+            98104,
+            99720,
+            99721,
+            99948,
+            99949,
+            99950,
+            184848,
+            184852
+          ],
+          "last_changed_offset": 184857,
+          "size_delta": 472
+        },
+        "MENU/STEP999.BIN": {
+          "identical": true,
+          "different_bytes": 0,
+          "first_changed_offsets": [],
+          "last_changed_offset": null,
+          "size_delta": 0
+        }
+      },
+      "overlays_only_a": [],
+      "overlays_only_b": [],
+      "code_identity": "NOT_PROVEN: EXE/overlay payloads mix code and data"
+    }
+  ],
+  "multiregion_functional": false,
+  "scope": "Identity/comparison only; no game, extraction or build"
+}

@@ -9,7 +9,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_CACHE_RE = re.compile(r"^cg10_[0-9a-f]{8}_gc[0-9a-f]{8}_f0$")
+CACHE_RE = re.compile(r"^cg(\d+)_([0-9a-f]{8})_gc[0-9a-f]{8}_f0$")
+MIN_NATIVE_DLLS = 10
 
 
 def fail(message: str) -> None:
@@ -84,29 +85,47 @@ def main() -> int:
     ):
         require(path, description, root)
 
-    hash_header = root / "build-recompiler-clang" / "psxrecomp_baked_codegen_hash.h"
-    require(hash_header, "codegen hash header", root)
-    hash_match = re.search(
-        r"PSX_OVERLAY_CODEGEN_HASH\s+0x([0-9a-fA-F]{8})u",
-        hash_header.read_text(encoding="utf-8"),
-    )
-    if not hash_match:
-        fail("codegen hash header has no parseable hash")
-    codegen_hash = hash_match.group(1).lower()
+    # The runtime reads the cache tag cg<VER>_<HASH>_... from the headers it was
+    # compiled with; the recompiler used to build overlay DLLs must bake the
+    # same hash. A stale recompiler (or stale cache) silently leaves every
+    # overlay interpreted ("OVERLAY CACHE HASH MISMATCH"), so verify all three.
+    def header_value(path: Path, pattern: str, description: str) -> str:
+        require(path, description, root)
+        match = re.search(pattern, path.read_text(encoding="utf-8"))
+        if not match:
+            fail(f"{description} has no parseable value")
+        return match.group(1).lower()
+
+    runtime_hash = header_value(
+        root / "psxrecomp" / "runtime" / "include" / "overlay_codegen_hash.h",
+        r"PSX_OVERLAY_CODEGEN_HASH\s+0x([0-9a-fA-F]{8})u", "runtime codegen hash")
+    codegen_ver = header_value(
+        root / "psxrecomp" / "runtime" / "include" / "overlay_api.h",
+        r"#define\s+PSX_OVERLAY_CODEGEN_VER\s+(\d+)", "runtime codegen version")
+    recompiler_hash = header_value(
+        root / "build-recompiler" / "psxrecomp_baked_codegen_hash.h",
+        r"PSX_OVERLAY_CODEGEN_HASH\s+0x([0-9a-fA-F]{8})u", "recompiler codegen hash")
+    if recompiler_hash != runtime_hash:
+        fail(f"recompiler hash {recompiler_hash} != runtime hash {runtime_hash}: "
+             "rebuild build-recompiler (cmake --build build-recompiler --target "
+             "psxrecomp-game) and recompile overlays")
+    codegen_hash = runtime_hash
 
     cache_root = root / "build-release" / "cache" / "SLUS-00493" / "gcc" / "win-x64"
     require(cache_root, "overlay cache root", root)
-    cache_dirs = [path for path in cache_root.iterdir() if path.is_dir()]
     matching = [
-        path for path in cache_dirs
-        if EXPECTED_CACHE_RE.match(path.name) and f"cg10_{codegen_hash}_" in path.name
+        path for path in cache_root.iterdir()
+        if path.is_dir() and CACHE_RE.match(path.name)
+        and path.name.startswith(f"cg{codegen_ver}_{codegen_hash}_")
     ]
     if len(matching) != 1:
-        fail(f"expected exactly one current codegen cache, found {len(matching)}")
+        fail(f"expected exactly one cache for cg{codegen_ver}_{codegen_hash}, "
+             f"found {len(matching)}; run recompile_overlays.cmd")
     cache = matching[0]
     dlls = sorted(cache.glob("*.dll"))
-    if len(dlls) != 10:
-        fail(f"expected 10 native overlay DLLs, found {len(dlls)} in {cache.name}")
+    if len(dlls) < MIN_NATIVE_DLLS:
+        fail(f"expected at least {MIN_NATIVE_DLLS} native overlay DLLs, "
+             f"found {len(dlls)} in {cache.name}")
     for dll in dlls:
         if not dll.with_suffix(".ranges").exists():
             fail(f"overlay DLL has no matching ranges file: {dll.name}")

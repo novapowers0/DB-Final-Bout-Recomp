@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "executed": false,
+  "mode": "launcher",
+  "disc": {
+    "source": "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DB Final Bout\\Dragon Ball GT - Final Bout (USA).cue",
+    "data_file": "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DB Final Bout\\Dragon Ball GT - Final Bout (USA).bin",
+    "data_file_size": 158811744,
+    "data_file_hashes": {
+      "md5": "2f869f926514278b72ffbd671e69b9f7",
+      "sha1": "8a2373f133788256cba64a1a0ba9fbb4b4667f71",
+      "sha256": "2f9d475fa089bed3f77a3344ea23af0663b30ffe9a2bc0b803bcae389480a15b"
+    },
+    "track_count": 1,
+    "toc_verified": false,
+    "index01_frames": 0,
+    "sector_stride": 2352,
+    "volume": "DRAGON_BALL_FB",
+    "serial": "SLUS-00493",
+    "region_hint": "NTSC-U",
+    "boot_path": "SLUS_004.93",
+    "boot": {
+      "size": 190464,
+      "sha256": "507f132cdcbb635bbbf7a75e15c62a9d0d51e22ce4432828da784ec03b67cbcc"
+    },
+    "entry_pc": "0x80010B98",
+    "load_address": "0x80010000",
+    "payload_size": 188416,
+    "payload_sha256": "4aaf50363762a03d0c50267880a21d770740c0118c77bb83c8063eade6935aa5",
+    "overlays": {
+      "MENU/STEP00.BIN": {
+        "size": 6568,
+        "sha256": "30262244d1ba9840e95fc9021ea4d08a8abc06a96c8a4918960709e35fc3ae54"
+      },
+      "MENU/STEP01.BIN": {
+        "size": 226452,
+        "sha256": "a65555d55ed6a9bb10111469b3d9a2d1e08906e1c8c6b895185f50c7c69a969c"
+      },
+      "MENU/STEP02.BIN": {
+        "size": 105680,
+        "sha256": "e77451ca7b18ae70878a32825c2ed855439911a1ee397afcc62c288af852b48c"
+      },
+      "MENU/STEP03.BIN": {
+        "size": 161368,
+        "sha256": "b5d3a557dbd3b51862477deb28b6b7adb5e5d6b36b4ea6af13fe6aa5cafcc364"
+      },
+      "MENU/STEP40.BIN": {
+        "size": 442876,
+        "sha256": "001adcdc2e129d3bd715c29b64e393fa8c2901a7ef39c2347874b321aae6b9dd"
+      },
+      "MENU/STEP999.BIN": {
+        "size": 51912,
+        "sha256": "99211a1bc53878c66865ffaa6b2b95b431415a314adb6eee6880624b82b06da9"
+      }
+    },
+    "runtime_compatibility": "NOT_VERIFIED"
+  },
+  "argv": [
+    "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DBFinalBoutRecomp\\build-release\\DBFinalBout_Recompiled.exe",
+    "--game",
+    "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DBFinalBoutRecomp\\game.toml",
+    "--disc",
+    "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DB Final Bout\\Dragon Ball GT - Final Bout (USA).cue",
+    "--launcher",
+    "--memcard-dir",
+    "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DBFinalBoutRecomp\\build-release\\qol-smoke-saves\\launcher",
+    "--debug-port",
+    "4370"
+  ],
+  "cwd": "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DBFinalBoutRecomp",
+  "environment": {
+    "PSX_NETPLAY": "0",
+    "PSX_NET_TRANSPORT": "lan",
+    "PSX_NET_MODE": "delay",
+    "PSX_NET_SLOTS": "2",
+    "PSX_NET_HOST_SPECTATES": "0",
+    "PSX_NET_GUEST_MEMCARD": "0",
+    "PSX_NET_FORCE_TURN": "0",
+    "PSX_NO_LAUNCHER": "0",
+    "PSX_FAIL_FAST_UNKNOWN_DISPATCH": "1"
+  },
+  "powershell": "powershell.exe -NoProfile -Command 'if (Get-Process -Name DBFinalBout_Recompiled,DBFinalBout_Recompiled_pgxp,psx-runtime,psx-runtime-pgxp,psx-beetle -ErrorAction SilentlyContinue) { throw ''Cierra el juego/oraculo antes de este smoke'' }; $env:PSX_NETPLAY=''0''; $env:PSX_NET_TRANSPORT=''lan''; $env:PSX_NET_MODE=''delay''; $env:PSX_NET_SLOTS=''2''; $env:PSX_NET_HOST_SPECTATES=''0''; $env:PSX_NET_GUEST_MEMCARD=''0''; $env:PSX_NET_FORCE_TURN=''0''; $env:PSX_NO_LAUNCHER=''0''; $env:PSX_FAIL_FAST_UNKNOWN_DISPATCH=''1''; Set-Location -LiteralPath ''C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DBFinalBoutRecomp''; & ''C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DBFinalBoutRecomp\\build-release\\DBFinalBout_Recompiled.exe'' ''--game'' ''C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DBFinalBoutRecomp\\game.toml'' ''--disc'' ''C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DB Final Bout\\Dragon Ball GT - Final Bout (USA).cue'' ''--launcher'' ''--memcard-dir'' ''C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DBFinalBoutRecomp\\build-release\\qol-smoke-saves\\launcher'' ''--debug-port'' ''4370''; exit $LASTEXITCODE'",
+  "memcard_dir": "C:\\Users\\javie\\Desktop\\PROYECTOS IA\\DBFinalBoutRecomp\\build-release\\qol-smoke-saves\\launcher",
+  "verified": "Disco/config y preparaci\u00f3n de argumentos solamente",
+  "not_verified": [
+    "launcher UI",
+    "boot",
+    "combate",
+    "determinismo",
+    "WAN/ICE",
+    "sombras",
+    "multi-regi\u00f3n"
+  ],
+  "notes": [
+    "Un equipo por peer; mismo disco, build, delay y session en ambos",
+    "Mods de gameplay desactivados para la l\u00ednea base",
+    "Launcher: no pulsar Generate & rebuild durante este smoke; puede instalar toolchains",
+    "El guard de procesos no sustituye coordinaci\u00f3n con otras sesiones"
+  ]
+}

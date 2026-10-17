@@ -163,11 +163,12 @@ committed. Build artifacts and game images are ignored by Git.
 
 ### v0.1.1
 
-Maintenance release: refreshed the `psxrecomp` and `recomp-ui` submodule pins
-and rebuilt the setup-host package. `psxrecomp` includes the upstream merge and
-the Reserved Instruction fix for the combat-transition dispatch. The new build
-compiles successfully; the specific Little Goku vs Piccolo transition still
-needs manual in-game validation.
+Maintenance release: refreshed the `psxrecomp` and `recomp-ui` submodule pins,
+rebuilt the setup-host package, and added narrow recovery for a stale cleared
+IRQ callback. A manual session completed Piccolo vs Goku and proceeded to the
+Little Goku Super Saiyan fight without a hang. The session logs predate the new
+callback counter, so they do not establish whether that recovery path ran; this
+result covers the tested sequence and is not a universal no-hang guarantee.
 
 Framework pins: `psxrecomp` `7d70880d` (`rework-master`), `recomp-ui`
 `01bff947`, and nested `recomp-net` `c2338c63`.
