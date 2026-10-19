@@ -1,5 +1,39 @@
 # DBFinalBout Recomp — Session Summary
 
+## 2026-10-19: R0 investigado; espera de trabajadores corregida y probada localmente
+
+- Estado preciso en `R0_ESTABILIDAD.md` y roadmap §10. R0-A (sampler) ya estaba
+  resuelto en v0.2.0. R0-B corregido en fuentes/build locales: el preparador
+  publica `DONE` antes de terminar el hilo; VBlank usaba `Wait(..., INFINITE)`.
+  Ahora consulta ambos trabajadores sin esperar y conserva DONE/recursos hasta
+  que terminen; finalización/rescan exactamente una vez. No se modifica watchdog.
+- Prueba real enlazada `test_autocompile_publication.c`: retener al trabajador
+  con eventos después de DONE bloqueaba el test12s antes del parche; PASS después.
+  Cubre también al lector aún vivo,300publicaciones,contrapresión y referencias.
+- R0-C **no cerrado**: `dbfb-r0-matrix-20261019/1-original` reprodujo watchdog
+  frame7236, gap5.241.554µs/CPU1.046.875µs/69.625ciclos; sampler0,cargaDLLmax4744µs.
+  Ocurrió antes de añadir medición por sección; no atribuirlo sin prueba a R0-B.
+- Telemetría pasiva `watchdog_max_check_gap` y ocho `watchdog_host_sections` en
+  reporte final. No suspensiones nuevas ni cambios de heartbeat/umbrales. Tests
+  reales siguen saliendo2 ante espera4,5s y bucle sin heartbeat. Hay rescans
+  del proveedor1,1–1,4s medidos que este parche no elimina.
+- Nuevo `tools/combat_stability.py`: ZIP verificado, carpeta/tarjetas por modo,
+  runtime original/renovado/PGXP explícito, hashes y checks de runtime además de
+  los del smoke. Evita confundir un original con copia cuyo mod ya está activo.
+- Verificación final: build normal+PGXP, **121 tests OK**,36gruposC,offline PASS,
+  caché1158/`cg18_1b6950cb_gc164a1e9a_f0`. Matriz
+  `dbfb-r0-verified-final-20261019`: original600s/5combates,
+  estándar300s/3,PGXP300s/2;3/3 PASS, pausa/estados,autocompile,quit0,sampler0.
+- Evidencia previa al parche:9sesiones originales600s/48combates PASS **y** el
+  fallo anterior. Esos PASS previos muestran por qué no bastan para cerrar R0-C.
+  WPR perdió eventos (no prueba causal); xperf reducido sin avisos de pérdida,
+  pero su sesión no falló. Evidencia privada en `%TEMP%/opencode/`.
+- Núcleo sobre835f1902 con cambios locales dirty; binarios finalesSHA256:
+  normal `13d093c1b1554b52bbfc0b8d4068e60c2c4f642158a7ef414041f26750d49e4e`,
+  PGXP `49b4bf4199140f0ec031761dfafac5e2dc1e85e3b28ac73ef39446593f8c8d26`.
+  La v0.2.0 pública conserva sus assets; no incorpora este parche. Sin nueva
+  publicación, commit ni push en esta continuación. `github/` ajeno preservado.
+
 ## 2026-10-19: visual revisado por el agente, R7 y publicación experimental 0.2.0
 
 - Render real del settle: 71 capturas; montaje 2896–2907 revisado por el agente,

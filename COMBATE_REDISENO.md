@@ -4,7 +4,13 @@ Fecha: 2026-10-17. Directriz del usuario: **activar y jugar**. El estándar fina
 debe estar bien ajustado; la investigación, el balance y la selección de opciones
 son trabajo del desarrollo, no una tarea que deba resolver cada jugador.
 
-**Estado más reciente (2026-10-19): roadmap §9.** Transición nueva integrada
+**Estado más reciente (2026-10-19): `R0_ESTABILIDAD.md` y roadmap §10.**
+Espera bloqueante del núcleo corregida localmente con reproducción antes/después;
+121tests, builds/offline y matriz final3/3 PASS (10combates). No se ha demostrado
+que explique los tres watchdog históricos: R0-C sigue abierto. La release0.2.0
+no contiene aún esta revisión local.
+
+**Historial de entrega: roadmap §9.** Transición nueva integrada
 y revisada visualmente por el agente; cámara ON/OFF inspeccionada, un par con
 estado equivalente. R7 cerrado para entrega experimental 0.2.0; 112 tests,
 builds normal/PGXP y offline PASS. El modo original del ZIP tuvo dos watchdog

@@ -1,6 +1,15 @@
 # Combate Responsive: implementación y evidencia
 
-## Estado vigente — revisión visual y R7 (2026-10-19)
+## Estado vigente — R0 posterior a release (2026-10-19)
+
+Ver `R0_ESTABILIDAD.md` y roadmap §10. Espera bloqueante de trabajadores tras
+DONE corregida **localmente**, reproducción controlada antes/después.121tests,
+builds y offline PASS; matriz final original5/estándar3/PGXP2 combates,3/3 PASS,
+pausa/estados y cierre0. Watchdog intacto. R0-C conserva tres fallos sin atribución
+definitiva; no cerrar R0 global. La distribución publicada0.2.0 no lleva el
+parche local. El historial visual/R7 siguiente sigue siendo válido.
+
+## Historial — revisión visual y R7 (2026-10-19)
 
 El agente revisó el render del settle (secuencia 2896–2907) y los 13 pares
 de cámara ON/OFF. El par relativo 145 conserva el estado de ambos luchadores;

@@ -1,9 +1,11 @@
 # Roadmap y relevo del combate — actualización 2026-10-19
 
-**Estado vigente: §9.** Verificación visual hecha por el agente; R7 cerrado
-como ciclo de integración y entrega experimental. R0 reabierto por dos cierres
-por watchdog en el modo original de paquetes extraídos; no hay cierre global
-de estabilidad. El historial inferior conserva sus resultados originales.
+**Estado vigente: §10 y `R0_ESTABILIDAD.md`.** R0-B corregido localmente:
+el hilo del juego ya no espera a trabajadores aún vivos tras `DONE`.
+Reproducción antes/después y 121tests OK; matriz final 3/3 PASS, 10combates.
+R0-C conserva tres cierres sin atribución definitiva; R0 global sigue abierto.
+R7 está cerrado como entrega experimental v0.2.0, que no contiene este parche
+local posterior. El historial inferior conserva sus resultados originales.
 
 Documento operativo para **cualquier modelo** que continúe. Complementa las
 reglas de `AGENTS.md` y `psxrecomp/CLAUDE.md`; sustituye el estado histórico del
@@ -775,3 +777,45 @@ intermitente sin causa; R2 giro/pies y anatomía de otros registros; R4 recorte
 en vuelo y exclusión de todas las tomas internas; R5 muestras aéreas/bloqueo;
 R6 balance cuantitativo más amplio. Estos son límites declarados de v0.2.0,
 no comprobaciones pendientes que se encarguen al usuario antes de publicar.
+
+## 10. Seguimiento R0 — espera bloqueante corregida localmente
+
+**Estado vigente tras la publicación.** Encargo: investigar R0 y dejar el estado
+pulido y bien establecido. Registro completo y comandos en
+[`R0_ESTABILIDAD.md`](R0_ESTABILIDAD.md).
+
+- **R0-A cerrado:** sampler de Windows opt-in, ya incluido en v0.2.0.
+- **R0-B cerrado en su reproducción controlada:** el VBlank esperaba con
+  `INFINITE` a trabajadores que publican `DONE` antes de terminar realmente.
+  Se reprodujo el bloqueo antes del parche; ahora el sondeo espera cero,
+  conserva recursos/estado y reintenta en el siguiente frame. El test retiene
+  ambos trabajadores, confirma finalización única y sigue comprobando las 300
+  publicaciones y el cierre del pipeline.
+- **R0-C abierto:** además de los dos cierres de §9, se reprodujo uno con
+  diagnóstico pasivo en `dbfb-r0-matrix-20261019/1-original`, frame7236,
+  pared5.241.554µs/CPU1.046.875µs/69.625ciclos, sampler0 y carga máxima4744µs.
+  No tenía aún atribución por sección; no adjudicarlo automáticamente a R0-B.
+- Observabilidad nueva: `watchdog_max_check_gap` y `watchdog_host_sections` en
+  el reporte final; ocho secciones host. Ni cambios de temporización invitada
+  ni nuevos heartbeats ni umbrales. Las pruebas del watchdog real conservan la
+  salida2 tras una espera4,5s y ante un bucle sin heartbeat.
+- Herramienta nueva `tools/combat_stability.py`: valida ZIP, aísla **cada modo**,
+  repeticiones/frío y tarjetas, registra hashes/identidad/errores del runtime.
+  `--build` prueba explícitamente los binarios locales, no sustituye una prueba
+  de la distribución publicada. `--modes original --rounds 3 --stop-on-failure`
+  permite perseguir R0-C con un comando sin pedir pruebas al usuario.
+- **Verificación final ejecutada:** 121tests OK, build normal/PGXP y offline
+  PASS. Matriz `dbfb-r0-verified-final-20261019`: original600s/5combates,
+  estándar300s/3, PGXP300s/2; **3/3 PASS**, pausa/estados, cierre0, autocompile
+  correcto y sampler0. Núcleo `835f1902-dirty`, hashes en el documento de R0.
+- Nueve sesiones originales600s **anteriores al parche** ya pasaban con48
+  combates; por tanto esos PASS no sirven como prueba causal del parche.
+- WPR general perdió eventos; no usarlo como prueba de causa. xperf CPU reducido
+  sin avisos de pérdida, pero su sesión PASS no capturó el cierre.
+- Seguimiento preciso: capturar R0-C con secciones/traza completas, atribuir la
+  operación, reproducir y corregir. El rescan del proveedor conserva costes
+  medidos de1,1–1,4s; no fue eliminado por la corrección de las esperas.
+
+La revisión está en fuentes y build locales; **v0.2.0 publicada no cambia**.
+R7 continúa cerrado como entrega experimental. R0 global no se marca cerrado
+por haber corregido R0-B ni por una matriz sin fallos.

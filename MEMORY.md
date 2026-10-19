@@ -154,7 +154,18 @@ inicial compila y pasa tests, pero **no es el rediseño definitivo**.
 
 ## 7. Estado abierto (lo que NO está resuelto)
 
-- **Vigente §9, 2026-10-19:** R7 cerrado para la entrega experimental 0.2.0;
+- **Vigente §10 / `R0_ESTABILIDAD.md`:** R0-B corregido localmente: el VBlank
+  no hace join bloqueante tras DONE; prueba controlada fallaba antes/pasa después,
+  ambos trabajadores retenidos y finalización única.121tests/builds/offline PASS;
+  matriz final3/3 PASS: original600s/5combates,estándar300s/3,PGXP300s/2.
+  R0-C sigue abierto en atribución: watchdogframe7236 con5,24s pared/1,05s CPU,
+  sampler0, antes de los cronómetros por sección. No adjudicar automáticamente
+  los tres cierres a R0-B. Reporte conCPU/ciclos y ocho secciones; watchdog intacto.
+  `tools/combat_stability.py` crea copias privadas por modo y valida runtime;
+  `--build` prueba candidato local. Núcleo835f1902-dirty, sin nuevo commit/push;
+  el ZIP público0.2.0 NO lleva esta corrección. Ver comandos y hashes en documento.
+
+- **Historial §9, 2026-10-19:** R7 cerrado para la entrega experimental 0.2.0;
   visual comprobado por el agente (render real del settle, 26 fotogramas de
   cámara y un par A/B con control de ambos luchadores idéntico). Sin revisión
   humana exigida. **R0 general reabierto:** dos paquetes/modo original salieron

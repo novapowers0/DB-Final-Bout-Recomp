@@ -1,6 +1,7 @@
 # AGENTS.md — DBFinalBout Recomp
 
-**Continuación vigente (2026-10-19):** leer `ROADMAP_RELEVO_COMBATE.md` §9 para
+**Continuación vigente (2026-10-19):** leer `R0_ESTABILIDAD.md` y
+`ROADMAP_RELEVO_COMBATE.md` §10 para
 el roadmap pendiente, estado más reciente y encargo transferible a otro modelo.
 Las secciones históricas de este archivo no sustituyen ese registro operativo.
 
@@ -407,7 +408,20 @@ ese fallo aislado como motivo para cambiar el protocolo.
 
 ### Directriz vigente del producto (2026-10-19)
 
-**Estado vigente §9:** revisión visual del agente completada (transición real
+**Actualización posterior a release (§10):** R0-B corregido localmente en
+`autocompile_poll_main`: sondeo de terminación de ambos trabajadores con espera
+cero; `DONE` no implica hilo terminado. Test controlado fallaba antes/pasa después,
+conservación de recursos y finalización única. 121tests OK; build normal/PGXP y
+offline PASS; matriz final original600s/5combates, estándar300s/3, PGXP300s/2,
+3/3 PASS. R0-C aún abierto: nuevo fallo instrumentado frame7236 con5,24s pared,
+1,05s CPU, sampler0, antes de medir secciones. Ver `R0_ESTABILIDAD.md`; no atribuir
+todos los cierres a R0-B. Secciones/CPU/ciclos en reporte; watchdog intacto.
+`tools/combat_stability.py` aísla cada modo y valida el runtime, con `--build`
+opcional para el candidato local. La v0.2.0 publicada NO contiene esta revisión.
+Fuentes del submódulo modificadas sobre835f1902; no representar el pin limpio
+como si incluyera los cambios locales. No tocar `github/` ajeno.
+
+**Historial de publicación §9:** revisión visual del agente completada (transición real
 2896–2907, cámara ON/OFF con un par de estado equivalente y 26 imágenes
 revisadas). R7 cerrado para entrega **experimental v0.2.0**; R0 general
 **reabierto**: dos watchdog en paquetes extraídos/modo original con sampler=0,
