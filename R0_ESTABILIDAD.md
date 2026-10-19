@@ -1,6 +1,6 @@
 # R0 — estabilidad: estado y comprobación reproducible
 
-**Estado vigente: 2026-10-19, después de publicar v0.2.1.**
+**Estado vigente: 2026-10-20, después de publicar v0.2.1 y completar la tanda R0-C.**
 
 Hay una corrección publicada y probada de una espera bloqueante del núcleo.
 **No hay evidencia suficiente para atribuirle todos los cierres históricos ni
@@ -73,8 +73,8 @@ restas sin signo desbordadas.
 heartbeat ni alteran la decisión del watchdog. Sus máximos no tienen por qué
 corresponder a un mismo instante: no sumarlos para explicar un fallo.
 
-También se detectaron sondeos del proveedor de alrededor de **1,1–1,4 s** y
-órdenes de depuración de hasta **1,5 s** en sesiones que terminaron bien. El
+También se detectaron sondeos del proveedor de hasta **1,61 s** y
+órdenes de depuración de hasta **1,70 s** en sesiones que terminaron bien. El
 rescan síncrono de caché sigue siendo un coste medido, no un bloqueo eliminado
 por el cambio de las esperas de trabajadores.
 
@@ -133,14 +133,42 @@ ejecutables y sus manifiestos de ejecución por los locales. La salida distingue
 la identidad del binario y los resultados de sesión de los del runtime.
 
 ```powershell
-# Para perseguir R0-C: tres arranques originales independientes, detenerse
-# en el primer fallo, sin repetir por accidente el modo renovado.
-python -B tools/combat_stability.py --build build-release --original-seconds 600 --rounds 3 --modes original --stop-on-failure --out "$env:TEMP\opencode\OTRA-CARPETA-NUEVA"
+# Para perseguir R0-C desde la distribución, sin sustituir binarios:
+# tres arranques originales independientes, detenerse en el primer fallo.
+python -B tools/combat_stability.py --archive "dist\dbfb-0.2.1-windows-x64.zip" --original-seconds 600 --rounds 3 --modes original --stop-on-failure --out "$env:TEMP\opencode\OTRA-CARPETA-NUEVA"
 ```
+
+Sin `--archive`, la herramienta usa el paquete de `VERSION`, no una versión
+antigua fija. `--build` sigue siendo una sustitución explícita para diagnóstico.
 
 No reutilizar una copia de paquete cuyo `mods/state.toml` ya se habilitó en
 otra prueba. Una sonda temprana de esta sesión se lanzó así por error: terminó
 normalmente, pero `original_inert=false`; **no cuenta como prueba del original**.
+
+## Tanda R0-C completada al retomar la sesión — 2026-10-20
+
+Tres arranques originales independientes desde el ZIP v0.2.1 sin modificar:
+**3/3 PASS, 1.800 s y 15 combates completos**. Cada sesión confirmó mod inerte,
+pausa/reanudación, guardar/cargar, autocompilación correcta, sampler=0,
+sin instrucciones/despachos desconocidos y salida `tcp_quit`/0. Mismo binario
+normal `21feae7c…067c8` de la release, sin cambios al watchdog.
+
+| Evidencia privada bajo `%TEMP%/opencode/` | Segundos | Combates | Gap máximo µs (pared/CPU) | `provider_poll` máx. µs | `debug_poll` máx. µs |
+|---|---:|---:|---:|---:|---:|
+| `dbfb-r0c-hunt-20261019/1-original` | 600 | 6 | 1702750 / 0 | 959717 | 1699967 |
+| `dbfb-r0c-resume-a-20261020/1-original` | 600 | 4 | 1618167 / 1093750 | 1613357 | 178754 |
+| `dbfb-r0c-resume-b-20261020/1-original` | 600 | 5 | 1457759 / 0 | 1138163 | 1454488 |
+
+La segunda sesión del intento inicial (`dbfb-r0c-hunt-20261019/2-original`)
+fue interrumpida: conserva capturas y heartbeat, pero no tiene resultado ni
+reporte de cierre. **No cuenta como PASS ni como fallo del runtime**. Al retomar
+no quedaban procesos del juego ni del arnés; se usaron carpetas nuevas para los
+dos arranques pendientes y se preservó toda la evidencia anterior.
+
+El fallo de R0-C no reapareció. Queda completado el intento de reproducción
+previsto, **no su atribución causal**. Las máximas son de sesiones sanas y pueden
+pertenecer a instantes distintos; no sumarlas ni usarlas para explicar un cierre
+anterior. El siguiente paso requiere capturar el episodio real descrito debajo.
 
 ## Criterio pendiente de cierre de R0-C
 

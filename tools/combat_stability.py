@@ -60,7 +60,8 @@ def extract_checked(archive, destination):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--archive', type=Path, default=ROOT / 'dist/dbfb-0.2.0-windows-x64.zip')
+    version = (ROOT / 'VERSION').read_text(encoding='utf-8').strip()
+    parser.add_argument('--archive', type=Path, default=ROOT / f'dist/dbfb-{version}-windows-x64.zip')
     parser.add_argument('--build', type=Path, help='Explicit local diagnostic executables and execution manifests')
     parser.add_argument('--disc', type=Path, default=ROOT / 'disc/Dragon Ball GT - Final Bout (USA).bin')
     parser.add_argument('--seconds', type=int, default=300)

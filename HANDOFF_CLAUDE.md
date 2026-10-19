@@ -1,11 +1,12 @@
 # HANDOFF_CLAUDE.md — Misión para la siguiente sesión (Claude)
 
-**Actualización 2026-10-19:** este encargo conserva el contexto histórico.
+**Actualización 2026-10-20:** este encargo conserva el contexto histórico.
 El relevo operativo actual, válido para cualquier modelo, está en
-`ROADMAP_RELEVO_COMBATE.md` §10/§11 y `R0_ESTABILIDAD.md`: leerlos antes de
+`ROADMAP_RELEVO_COMBATE.md` §12/§11/§10 y `R0_ESTABILIDAD.md`: leerlos antes de
 usar los estados/comandos antiguos. R0-B corregido, probado y publicado en
 v0.2.1; R0-C sin atribución causal definitiva.121tests y matriz del ZIP3/3 PASS.
-No afirmar cierre global de R0.
+No afirmar cierre global de R0. Tanda posterior original3/3 PASS,30minutos y
+15combates completada al retomar; el fallo R0-C no reapareció y sigue sin causa.
 
 > **Destinatario:** la instancia de Claude que retoma este proyecto para
 > iteraciones de pulido/mejora.

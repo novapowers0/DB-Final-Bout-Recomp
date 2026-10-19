@@ -1,12 +1,13 @@
-# Roadmap y relevo del combate — actualización 2026-10-19
+# Roadmap y relevo del combate — actualización 2026-10-20
 
-**Estado vigente: §11, §10 y `R0_ESTABILIDAD.md`.** R0-B corregido y publicado
+**Estado vigente: §12, §11, §10 y `R0_ESTABILIDAD.md`.** R0-B corregido y publicado
 en **v0.2.1**: el hilo del juego ya no espera a trabajadores aún vivos tras
 `DONE`. Reproducción antes/después, 121tests OK y matriz del ZIP 3/3 PASS,
 10combates. R0-C conserva tres cierres sin atribución definitiva; R0 global
 sigue abierto. R7 permanece cerrado como entrega experimental; v0.2.1 es una
 pre-release de mantenimiento. El historial inferior conserva sus resultados
-originales.
+originales. Tanda adicional R0-C completada: 3/3 originales PASS,30minutos y
+15combates; el fallo no reapareció y su causa sigue abierta.
 
 Documento operativo para **cualquier modelo** que continúe. Complementa las
 reglas de `AGENTS.md` y `psxrecomp/CLAUDE.md`; sustituye el estado histórico del
@@ -839,3 +840,22 @@ haber corregido R0-B ni por una matriz sin fallos.
 - **Límite:** R0-C no se cierra. La corrección es de clase y está probada en su
   reproducción controlada, pero no explica por sí sola los tres cierres
   históricos. Los costes de `provider_poll` (1,1–1,4 s) siguen documentados.
+
+## 12. Seguimiento R0-C completado al retomar — 2026-10-20
+
+- La tanda iniciada antes de la interrupción dejó `1-original`600s/6combates
+  PASS y `2-original` incompleta, sin reporte de cierre. Esta última se conserva
+  y no se cuenta. Al retomar no quedaban procesos del juego ni del arnés.
+- Se completaron los dos arranques pendientes en carpetas nuevas desde el ZIP
+  v0.2.1 sin sustituir binarios: `dbfb-r0c-resume-a-20261020`600s/4combates y
+  `dbfb-r0c-resume-b-20261020`600s/5combates. Total válido de la tanda:
+  **3/3 PASS,1.800s,15combates**, pausa/estados, original inerte,autocompile,
+  sampler0,sin unsupported/unknown dispatch y cierre `tcp_quit`/0.
+- Datos completos en `R0_ESTABILIDAD.md`: gap máximo1,70s; provider hasta1,61s
+  y debug hasta1,70s en sesiones sanas. No sumar máximas ni atribuir con ellas
+  los cierres anteriores. El watchdog y los binarios publicados no se cambian.
+- La herramienta elige por defecto el ZIP de `VERSION`, evitando la referencia
+  fija a0.2.0. `--archive` sigue permitiendo elegir una distribución explícita.
+- **R0-C sin cierre causal:** el fallo no reapareció. El intento previsto está
+  terminado; falta capturarlo con secciones/traza, aislar su operación y probar
+  un arreglo antes/después. R1–R6 mantienen sus límites documentados.

@@ -154,7 +154,16 @@ inicial compila y pasa tests, pero **no es el rediseño definitivo**.
 
 ## 7. Estado abierto (lo que NO está resuelto)
 
-- **Vigente §10 / `R0_ESTABILIDAD.md`:** R0-B corregido localmente: el VBlank
+- **Seguimiento vigente 2026-10-20, roadmap §12:** tanda R0-C completada,
+  3arranques originales600s,6/4/5combates,3/3 PASS desde el ZIP0.2.1 intacto.
+  La sesión2 interrumpida del primer intento no cuenta: sin smoke/reporte final.
+  Evidencia privada `dbfb-r0c-hunt-20261019/1-original` y
+  `dbfb-r0c-resume-{a,b}-20261020/1-original`. Sin procesos vivos al retomar.
+  R0-C no reapareció: sigue sin atribución causal; no cerrarlo por acumular PASS.
+  Provider hasta1,61s/debug1,70s en sesiones sanas. Herramienta usa por defecto
+  el ZIP de `VERSION`; `--archive` explícito para versiones históricas.
+
+- **Estado §10/§11 / `R0_ESTABILIDAD.md`:** R0-B corregido y publicado: el VBlank
   no hace join bloqueante tras DONE; prueba controlada fallaba antes/pasa después,
   ambos trabajadores retenidos y finalización única.121tests/builds/offline PASS;
   matriz final3/3 PASS: original600s/5combates,estándar300s/3,PGXP300s/2.

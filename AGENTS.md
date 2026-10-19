@@ -1,7 +1,7 @@
 # AGENTS.md — DBFinalBout Recomp
 
-**Continuación vigente (2026-10-19):** leer `R0_ESTABILIDAD.md` y
-`ROADMAP_RELEVO_COMBATE.md` §10 para
+**Continuación vigente (2026-10-20):** leer `R0_ESTABILIDAD.md` y
+`ROADMAP_RELEVO_COMBATE.md` §12/§11/§10 para
 el roadmap pendiente, estado más reciente y encargo transferible a otro modelo.
 Las secciones históricas de este archivo no sustituyen ese registro operativo.
 
@@ -408,8 +408,15 @@ ese fallo aislado como motivo para cambiar el protocolo.
 
 ### Directriz vigente del producto (2026-10-19)
 
-**Actualización posterior a release (§10):** R0-B corregido localmente en
-`autocompile_poll_main`: sondeo de terminación de ambos trabajadores con espera
+**Seguimiento 2026-10-20 (§12):** completada la tanda original R0-C desde el ZIP
+v0.2.1:3/3 PASS,30minutos/15combates, sin reproducir el fallo. Un intento parcial
+interrumpido queda preservado y excluido del recuento. Provider hasta1,61s y
+debug hasta1,70s en sesiones sanas; no son atribución del fallo histórico.
+`combat_stability.py` usa el ZIP de `VERSION` por defecto. R0-C sigue abierto:
+requiere fallo capturado, operación aislada y prueba antes/después.
+
+**Actualización posterior a release (§10):** R0-B corregido en
+`autocompile_poll_main` y publicado en v0.2.1: sondeo de ambos trabajadores con espera
 cero; `DONE` no implica hilo terminado. Test controlado fallaba antes/pasa después,
 conservación de recursos y finalización única. 121tests OK; build normal/PGXP y
 offline PASS; matriz final original600s/5combates, estándar300s/3, PGXP300s/2,

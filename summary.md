@@ -1,5 +1,33 @@
 # DBFinalBout Recomp — Session Summary
 
+## 2026-10-20: tanda R0-C retomada y completada, sin reproducir el fallo
+
+- Tras la interrupción, `dbfb-r0c-hunt-20261019/matrix.json` conservaba una
+  sesión completa600s/6combates PASS; `2-original` tenía capturas/heartbeat pero
+  no smoke/reporte final. No se cuenta esta sesión parcial ni como PASS ni como
+  fallo. Sin procesos del juego/arnés vivos al retomar; evidencia preservada.
+- Dos arranques nuevos desde el ZIP v0.2.1, sin `--build`, puerto4425:
+  `dbfb-r0c-resume-a-20261020`600s/4combates y
+  `dbfb-r0c-resume-b-20261020`600s/5combates, ambos PASS. Total de la tanda
+  prevista: **3/3 PASS,30minutos,15combates**, original inerte, pausa/estados,
+  autocompile correcto,sampler0,quit0,sin unsupported/unknown dispatch.
+- Binario normal de release sin modificar `21feae7c…067c8`, identidad
+  `nightly-1382-ga51c9aa7`. Gaps máximos pared/CPUµs:1702750/0,
+  1618167/1093750,1457759/0. Provider máximo1613357µs y debug máximo1699967µs;
+  las máximas no prueban una causa ni necesariamente coinciden en el tiempo.
+- R0-C **sigue sin atribución**: no reapareció en esta tanda. No cerrar la
+  investigación por acumular PASS. Próxima acción: capturar un fallo real con
+  secciones/traza completas, reproducir su operación y exigir antes/después.
+- `tools/combat_stability.py` toma ahora el ZIP predeterminado de `VERSION`;
+  evita que los comandos sin `--archive` sigan usando v0.2.0 accidentalmente.
+  R0/roadmap/AGENTS/memoria actualizados; release y binarios sin cambios.
+- Comprobaciones finales ejecutadas: `python -B -m unittest discover -s
+  tools/tests -p "test_combat_stability.py"` (5tests OK),
+  `python -B tools/verify_offline.py` (PASS,1158DLLs),
+  `python -B tools/combat_stability.py --help` y `git diff --check` correctos.
+  Sin procesos del juego al terminar; submódulo limpio. La suite121 y builds
+  completos son los de la tanda anterior; aquí no se modificó código del runtime.
+
 ## 2026-10-19: v0.2.1 publicada y verificada; R0-C sigue abierto
 
 - Núcleo `a51c9aa7` (`runtime: avoid blocking VBlank on finishing autocompile
