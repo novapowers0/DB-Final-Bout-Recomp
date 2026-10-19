@@ -1,72 +1,48 @@
 format_version = 6
 id = "dbfb.responsive"
 version = "0.1.0"
-name = "Final Bout Responsive Combat"
+name = "Final Bout — Combate renovado"
 author = "NovaPowers"
-description = "Default-off, offline-only combat input experiments for the verified USA input path. Original performs no input writes or allocations. Fighter state, recovery, hit-stop and balance are not modified."
+description = "Perfil estándar de combate: respuesta, remates aéreos nativos, ritmo de ataques, aceleración y frenado, ki, defensa, hit-stop, cancelación tras impacto, ráfagas acotadas, técnicas con menor coste, cámara general más abierta, cámara de KO e IA según dificultad. Incluye una transición nueva del brazo para el registro de animación 0 verificado. Experimental, sin balance exhaustivo."
 license = "PolyForm-Noncommercial-1.0.0"
 resolver = "declarative"
 
 [[target]]
 game_id = "SLUS-00493"
 
-# Tier 1: read-only. Samples both pads (raw SIO word + press edges) every guest
-# VBlank while the verified combat poll path is active, into a lazy ring in
-# plugin-owned Expansion-1 memory (read_ram). Never writes gameplay memory.
+[[feature]]
+id = "standard"
+name = "Combate renovado"
+description = "Activar y jugar: entradas, remates aéreos por su ventana nativa, ataques y poses retimados juntos, aceleración/frenado, ki, guardia, hit-stop, empuje y cancelación tardía tras acertar. Ráfagas al 125% con duración limitada y técnicas con coste al 80%. Transición nueva de recuperación del brazo solo para el registro 0 verificado. Cámara general más abierta (opt-out DBFB_CAMERA_FRAMING=0), cámara de KO e IA según dificultad. Respeta pausa y estados guardados. Experimental: el vuelo puede conservar recortes de cámara originales y el balance no es exhaustivo. Solo offline."
+group = "Combate"
+default_enabled = false
+channel = "experimental"
+
+[[plugin]]
+feature = "standard"
+id = "dbfb.responsive.standard"
+
+[[feature]]
+id = "unlock-all"
+name = "Todos los personajes"
+description = "Desbloquea los 17 luchadores (incluido Goku SSJ4) sin teclear el código en la pantalla de título: escribe el valor del truco original (0x1FFFF) en la tabla de personajes, solo desde los estados conocidos (0x7DF o 0x1BFFF). Solo offline."
+group = "Combate"
+default_enabled = false
+channel = "experimental"
+
+[[plugin]]
+feature = "unlock-all"
+id = "dbfb.responsive.unlock-all"
+
+# Diagnostic instrumentation is absent from release builds.
 [[feature]]
 id = "trace"
 name = "Combat trace (read-only)"
-description = "Offline only. Records verified combat polls, pad samples and press edges for input timing analysis. Writes only to its own diagnostic ring, never to gameplay state. Independent of input assistance."
-group = "Combat"
+description = "Developer capture of input and fighter/script state; independent of the standard combat mode."
+group = "Development"
 default_enabled = false
 channel = "developer"
 
 [[plugin]]
 feature = "trace"
 id = "dbfb.responsive.trace"
-
-# Tier 2: two mutually exclusive, honestly named input experiments. The buffer
-# catches taps BETWEEN polls; it cannot wait for an unknown recovery state.
-# No netplay/rollback serialization: callbacks actively refuse online/resim.
-[[feature]]
-id = "input-buffer"
-name = "Combat input assistance (offline experiment)"
-description = "Offline only. Catch a short face/shoulder tap between polls once, or explicitly choose a bounded hold extension. Only the verified combat input stack word is changed. No directions or menu buttons are synthesized. START/SELECT suspends assistance until the combat code context leaves or a new activation; combat feel still needs playtesting."
-group = "Combat"
-default_enabled = false
-channel = "experimental"
-
-[[option]]
-feature = "input-buffer"
-id = "mode"
-label = "Input mode"
-description = "Original is inert. Tap buffer delivers a missed sampled press once; it is not a recovery/command buffer. Hold extension is a separate experiment."
-type = "choice"
-default = "buffer"
-
-[[option.choice]]
-value = "original"
-label = "Original (no assistance)"
-
-[[option.choice]]
-value = "buffer"
-label = "Tap buffer between input polls"
-
-[[option.choice]]
-value = "hold"
-label = "Bounded hold extension"
-
-[[option]]
-feature = "input-buffer"
-id = "window"
-label = "Lifetime (guest VBlanks)"
-description = "1–6 guest VBlanks, including the press sample. Buffer expires when its age reaches this value; hold duration starts at the raw poll rising edge and never restarts while held. This replaces the old extra-polls setting."
-type = "integer"
-min = 1
-max = 6
-step = 1
-default = 2
-
-[[plugin]]
-feature = "input-buffer"
-id = "dbfb.responsive.input-buffer"

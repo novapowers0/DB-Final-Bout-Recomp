@@ -1,5 +1,9 @@
 # HANDOFF_CLAUDE.md — Misión para la siguiente sesión (Claude)
 
+**Actualización 2026-10-18:** este encargo conserva el contexto histórico.
+El relevo operativo actual, válido para cualquier modelo, está en
+`ROADMAP_RELEVO_COMBATE.md`: leerlo antes de usar los estados/comandos antiguos.
+
 > **Destinatario:** la instancia de Claude que retoma este proyecto para
 > iteraciones de pulido/mejora.
 > **Objetivo doble:** (A) dejar el juego funcional **de extremo a extremo** y

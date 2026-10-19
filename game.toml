@@ -31,13 +31,22 @@ seeds = "seeds/ghidra_funcs.txt"
 out_dir = "generated"
 strict = true
 # Trusted opt-in hooks for the dbfb.responsive plugin (src/mods/dbfb_responsive.c).
-# Both are real prologues in the STEP40 lower region, verified against live RAM
-# (INFORME_CLAUDE.md section 5). The callbacks fail closed if the code differs.
+# Real STEP40 prologues: poll/remap (INFORME_CLAUDE.md section 5), action
+# interpreter and pose player (COMBATE_REDISENO.md section 9). The latter two
+# are filtered during hit-stop without editing either clock or pose packets.
 # NOTE: these are OVERLAY addresses (not in the base EXE text), so the EXE
 # recompile emits no function-entry calls for them; they fire only when the
 # STEP40 overlay runs (native or interpreted). They are recorded here so the
 # overlay codegen keeps the hooks wired.
-mod_function_entry_funcs = ["0x8003FCF0", "0x8003FE68"]
+mod_function_entry_funcs = ["0x8003FCF0", "0x8003FE68", "0x8004E530", "0x80042240"]
+# Verified STEP40 instruction seams. 0x80054A60 (lh a0,+0x2856) runs before the
+# acceptance gate reads the command, so the standard profile can hand side 2 a
+# real command; 0x80054AE8 runs after acceptance (command recovery) and
+# 0x80066D28 before the damage positivity/guard body. Standard-only callbacks
+# preserve the original flow and fail closed if the code differs.
+# Basic ki: 0x8004F5A0 marks exact spawns; 0x800592A8/0x800592FC scale
+# trig results before native XYZ integration/collision (COMBATE_REDISENO §9).
+mod_instruction_sites = ["0x80054A60", "0x80054AE8", "0x80066D28", "0x8004F5A0", "0x800592A8", "0x800592FC", "0x80067A68", "0x80054F88"]
 
 [runtime]
 window_title = "DBFinalBout Recompiled"

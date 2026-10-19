@@ -23,7 +23,7 @@ This is not a traditional emulator.
 | **Region** | USA |
 | **Serial** | SLUS-00493 |
 | **Genre** | 3D fighting |
-| **Version** | v0.1.1 |
+| **Version** | v0.2.0 |
 
 Copyright (c) 2026 **NovaPowers**. MIT License (see `LICENSE`).
 
@@ -36,8 +36,8 @@ The game and its data are **not distributed**. You must provide files from your
 
 - This project expects the USA version `SLUS-00493`.
 - See `baserom.md` for the expected size, serial, volume and checksums.
-- Disc images, retail BIOS files and generated game code are not included.
-- Recompiled code is generated locally from your own game files.
+- Disc images, retail BIOS files and generated C sources are not included.
+- The release includes compiled runtimes and native overlay libraries. You supply the disc.
 
 This is an unofficial, non-commercial research and preservation project. It is
 not affiliated with or endorsed by Bandai, Shueisha, Toei Animation or any other
@@ -47,16 +47,28 @@ Dragon Ball rightsholder.
 
 ## Playing
 
-1. Download `dbfb-0.1.1-setup-host-win64.zip` from
-   [Releases](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/latest).
+1. Download `dbfb-0.2.0-windows-x64.zip` from
+   [v0.2.0 experimental release](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.0).
 2. Extract the package to a Windows folder.
 3. Provide your legally owned copy following the identity in `baserom.md`.
 4. Run `DBFinalBout_Recompiled.exe` or open the included launcher.
 5. Keep widescreen disabled for faithful 4:3 presentation, or enable
    `psx.enhancement.widescreen` for 16:9/adaptive presentation.
 
-The setup-host package may request the game files during first-time setup. Do
-not download BIOS files or disc images from this repository.
+The package is already compiled. Select your own disc on first launch; no build
+is required. OpenBIOS is included under its MIT license.
+
+### Renewed combat (optional, offline)
+
+In **Mods**, enable **Combate renovado** for the integrated combat profile.
+**Todos los personajes** unlocks all 17 fighters independently. Both default to
+off. The profile includes input assistance, native aerial follow-ups, movement,
+defense, hit-stop, ki changes and a slightly wider camera. The new arm recovery
+transition is limited to verified animation record 0. This remains experimental:
+flight can still leave a fighter outside the original camera's view; measured
+move cards and difficulty balance are not exhaustive. See the release notes.
+Original-mode package tests also exposed an intermittent watchdog exit; the
+cause remains open. v0.2.0 is an experimental pre-release.
 
 ### Recommended Settings
 

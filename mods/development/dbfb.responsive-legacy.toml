@@ -1,0 +1,180 @@
+# Archived development switches, not staged in the player catalog.
+format_version = 6
+id = "dbfb.responsive"
+version = "0.1.0"
+name = "Final Bout Responsive Combat"
+author = "NovaPowers"
+description = "Default-off, offline-only combat experiments for the verified USA combat path. Input assistance only rewrites the verified input stack word. The Tier 3 rules (ki economy, movement speed, chain window) do touch fighter state, each behind its own switch and code-identity guard. Nothing is modified unless you turn it on; none of it is playtested yet."
+license = "PolyForm-Noncommercial-1.0.0"
+resolver = "declarative"
+
+[[target]]
+game_id = "SLUS-00493"
+
+# Tier 1: read-only. Samples both pads (raw SIO word + press edges) every guest
+# VBlank while the verified combat poll path is active, into a lazy ring in
+# plugin-owned Expansion-1 memory (read_ram). Never writes gameplay memory.
+[[feature]]
+id = "trace"
+name = "Combat trace (read-only)"
+description = "Offline only. Records verified combat polls, pad samples and press edges for input timing analysis. Writes only to its own diagnostic ring, never to gameplay state. Independent of input assistance."
+group = "Combat"
+default_enabled = false
+channel = "developer"
+
+[[plugin]]
+feature = "trace"
+id = "dbfb.responsive.trace"
+
+# Tier 2: two mutually exclusive, honestly named input experiments. The buffer
+# catches taps BETWEEN polls; it cannot wait for an unknown recovery state.
+# No netplay/rollback serialization: callbacks actively refuse online/resim.
+[[feature]]
+id = "input-buffer"
+name = "Combat input assistance (offline experiment)"
+description = "Offline only. Catch a short face/shoulder tap between polls once, or explicitly choose a bounded hold extension. Only the verified combat input stack word is changed. No directions or menu buttons are synthesized. START/SELECT suspends assistance until the combat code context leaves or a new activation; combat feel still needs playtesting."
+group = "Combat"
+default_enabled = false
+channel = "experimental"
+
+[[option]]
+feature = "input-buffer"
+id = "mode"
+label = "Input mode"
+description = "Original is inert. Tap buffer delivers a missed sampled press once; it is not a recovery/command buffer. Hold extension is a separate experiment."
+type = "choice"
+default = "buffer"
+
+[[option.choice]]
+value = "original"
+label = "Original (no assistance)"
+
+[[option.choice]]
+value = "buffer"
+label = "Tap buffer between input polls"
+
+[[option.choice]]
+value = "hold"
+label = "Bounded hold extension"
+
+[[option]]
+feature = "input-buffer"
+id = "window"
+label = "Lifetime (guest VBlanks)"
+description = "1–6 guest VBlanks, including the press sample. Buffer expires when its age reaches this value; hold duration starts at the raw poll rising edge and never restarts while held. This replaces the old extra-polls setting."
+type = "integer"
+min = 1
+max = 6
+step = 1
+default = 2
+
+[[plugin]]
+feature = "input-buffer"
+id = "dbfb.responsive.input-buffer"
+
+# Tier 3: combat RULES. These DO touch fighter state. Every one is default off,
+# original-by-default inside, offline only, and refuses netplay/resimulated
+# frames. They run from the already verified combat input poll (0x8003FCF0), so
+# no overlay recompile is involved. Not playtested: see COMBATE_MAPA.md.
+[[feature]]
+id = "ki-economy"
+name = "Ki economy (offline experiment)"
+description = "Offline only. Adds ki to both fighters every N verified combat polls, capped at 196. Negative sentinel values and out-of-range values are untouched. START/SELECT suspends this experiment until a new activation or a detected change of combat code context."
+group = "Combat"
+default_enabled = false
+channel = "experimental"
+
+[[option]]
+feature = "ki-economy"
+id = "mode"
+label = "Ki mode"
+description = "Original is inert. Flow adds a small amount of ki on a period."
+type = "choice"
+default = "original"
+
+[[option.choice]]
+value = "original"
+label = "Original (no change)"
+
+[[option.choice]]
+value = "flow"
+label = "Faster ki recovery"
+
+[[option]]
+feature = "ki-economy"
+id = "period"
+label = "Ticks between ki gains"
+description = "The combat poll runs once every two guest frames. A period of 2 adds one ki point every four guest frames to each fighter."
+type = "integer"
+min = 1
+max = 8
+step = 1
+default = 2
+
+[[plugin]]
+feature = "ki-economy"
+id = "dbfb.responsive.ki-economy"
+
+[[feature]]
+id = "speed-scale"
+name = "Movement speed (offline experiment)"
+description = "Offline only. Experiments with stored movement speed at verified combat polls (75%, 125%, 150%). The first sample is a baseline; later observed changes are scaled without repeatedly scaling unchanged values. This is sampled assistance, not an exact per-script hook. Original restores the last tracked raw speed on the next verified poll. START/SELECT suspends further writes."
+group = "Combat"
+default_enabled = false
+channel = "experimental"
+
+[[option]]
+feature = "speed-scale"
+id = "mode"
+label = "Movement speed"
+description = "Original leaves the script's own value untouched."
+type = "choice"
+default = "original"
+
+[[option.choice]]
+value = "original"
+label = "Original"
+
+[[option.choice]]
+value = "75"
+label = "75% (calmer)"
+
+[[option.choice]]
+value = "125"
+label = "125%"
+
+[[option.choice]]
+value = "150"
+label = "150% (large)"
+
+[[plugin]]
+feature = "speed-scale"
+id = "dbfb.responsive.speed-scale"
+
+[[feature]]
+id = "chain-window"
+name = "Chain window / cancels (offline experiment)"
+description = "Offline only. Relaxes one verified busy-state command rejection; other action gates still apply. Actual combos/cancels are not playtested. Applied only at a verified combat poll, with surrounding code checks. Set Original to restore the instruction before disabling this feature, or restart the game. START/SELECT suspends further poll writes."
+group = "Combat"
+default_enabled = false
+channel = "experimental"
+
+[[option]]
+feature = "chain-window"
+id = "mode"
+label = "Command acceptance"
+description = "Original keeps the stock rejection. Open keeps the command instead of discarding it."
+type = "choice"
+default = "original"
+
+[[option.choice]]
+value = "original"
+label = "Original (stock rejection)"
+
+[[option.choice]]
+value = "open"
+label = "Open (allow chaining)"
+
+[[plugin]]
+feature = "chain-window"
+id = "dbfb.responsive.chain-window"

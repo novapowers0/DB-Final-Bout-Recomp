@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import re
 import sys
 from pathlib import Path
@@ -113,15 +114,20 @@ def main() -> int:
 
     cache_root = root / "build-release" / "cache" / "SLUS-00493" / "gcc" / "win-x64"
     require(cache_root, "overlay cache root", root)
-    matching = [
-        path for path in cache_root.iterdir()
-        if path.is_dir() and CACHE_RE.match(path.name)
-        and path.name.startswith(f"cg{codegen_ver}_{codegen_hash}_")
-    ]
-    if len(matching) != 1:
-        fail(f"expected exactly one cache for cg{codegen_ver}_{codegen_hash}, "
-             f"found {len(matching)}; run recompile_overlays.cmd")
-    cache = matching[0]
+    # Several configurations may legitimately coexist (e.g. before/after adding
+    # instruction hooks). Select the namespace the runtime will actually load,
+    # using the framework's canonical serializer, never an arbitrary old cache.
+    spec = importlib.util.spec_from_file_location(
+        "dbfb_overlay_compiler", root / "psxrecomp/tools/compile_overlays.py")
+    compiler = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(compiler)
+    tag = compiler.cache_tag(
+        str(root / "psxrecomp/runtime/include"),
+        str(root / "build-recompiler/psxrecomp-game.exe"), str(source_config))
+    if not CACHE_RE.fullmatch(tag) or not tag.startswith(f"cg{codegen_ver}_{codegen_hash}_"):
+        fail(f"unexpected canonical cache tag: {tag}")
+    cache = cache_root / tag
+    require(cache, "cache for the current overlay configuration; run recompile_overlays.cmd", root)
     dlls = sorted(cache.glob("*.dll"))
     if len(dlls) < MIN_NATIVE_DLLS:
         fail(f"expected at least {MIN_NATIVE_DLLS} native overlay DLLs, "

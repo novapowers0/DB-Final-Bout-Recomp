@@ -1,5 +1,9 @@
 # AGENTS.md — DBFinalBout Recomp
 
+**Continuación vigente (2026-10-19):** leer `ROADMAP_RELEVO_COMBATE.md` §9 para
+el roadmap pendiente, estado más reciente y encargo transferible a otro modelo.
+Las secciones históricas de este archivo no sustituyen ese registro operativo.
+
 Guía para cualquier sesión (agente o humano) que retome este proyecto. Léela entera
 antes de tocar nada: contiene el modelo mental, el estado real del trabajo, y los
 comandos correctos. Complementa (no reemplaza) a `summary.md`, `ANALISIS_CRASHES.md`
@@ -400,6 +404,96 @@ ese fallo aislado como motivo para cambiar el protocolo.
 5. `summary.md` — registro cronológico de sesiones.
 
 ## 14. Material de referencia del combate
+
+### Directriz vigente del producto (2026-10-19)
+
+**Estado vigente §9:** revisión visual del agente completada (transición real
+2896–2907, cámara ON/OFF con un par de estado equivalente y 26 imágenes
+revisadas). R7 cerrado para entrega **experimental v0.2.0**; R0 general
+**reabierto**: dos watchdog en paquetes extraídos/modo original con sampler=0,
+sin causa demostrada. No confundir con el mecanismo del sampler ya eliminado.
+112 tests/36 grupos C, build normal+PGXP y offline PASS; pruebas del ZIP
+estándar/PGXP PASS, original con fallos explícitos en la matriz. No decir que
+todo pasó. Publicación autorizada por el usuario. Empaquetar con
+`python -B tools/package_release.py`, que valida Python portable completo,
+TinyCC, catálogo público apagado y hashes del ZIP; preservar stages anteriores.
+Pins actuales en `framework_pins.txt` (núcleo `835f1902`). La inspección visual
+no requiere delegación al usuario; el recorte en vuelo y balance exhaustivo
+siguen siendo límites documentados del producto.
+ZIP final: 3/3 sesiones PASS (original 2 combates; estándar y PGXP 1 cada uno),
+autocompile correcto, sampler=0. No borrar por ello los fallos previos de R0.
+
+**Tanda histórica §8 de `ROADMAP_RELEVO_COMBATE.md`:** R3 settle integrado y probado
+en partida (acción 6 → slot creado); R4 encuadre general implementado en el seam
+nuevo `0x80054F88` (opt-out `DBFB_CAMERA_FRAMING=0`, overlays recompilados,
+namespace `cg18_1b6950cb_gc164a1e9a_f0`, 1158 DLLs); R5 fichas medidas
+(`tools/combat_cards.py`); R6 dificultad 0/1/2 verificada en partida; R1
+cmd29/200→9B capturado. **111 tests OK** (36 grupos C), build exit 0,
+`verify_offline` PASS. Pendientes: visual del settle, A/B visual de cámara,
+aéreos/bloqueo en fichas, n mayor por dificultad, balance humano, R7.
+
+**Tanda §7 anterior:** R0 corregido de clase (sampler
+de host opt-in `PSX_HOST_SAMPLER_SUSPEND=1`, watchdog intacto); R1 cmd25 entregado
+y observado en partida (`followup_lift`, pendiente cmd29/200→9B); R2/R3 geometría y
+transición propia sin integrar; R4 cámara mapeada con sonda de solo lectura.
+86tests/35gruposC, builds normal/PGXP PASS, `verify_offline` PASS y partida
+`dbfb-final-20261019` (4 combates, salida0, `max_suspend_us=0`). Restan giro propio,
+clips nuevos renderizados, cámara general, fichas nominales y balance humano.
+
+**Tramo §12 anterior:** NUEVO `dbfb_locomotion.h`, hook80067A68/02020018: delta
+de raíz propio con aceleración/frenado antes de proyección/colisiones nativas.
+65tests/34gruposC y buildsPASS. Sesiónn420s/4382:4combates,pausa,save/load,
+salida0,5321intervenciones de locomoción. Namespace
+**cg18_1b6950cb_gc58692d0b_f0**,1157DLLsconranges; ocho rechazos de auditoría
+kernel durante reconstrucción, no ocultarlos. m/n no reprodujeron l; nuevo
+samplermaxsuspendTCP/reporte123400/173844µs. Bloqueo l aún abierto. No se han
+terminado rutas aéreas, clips nuevos, giro propio, cámara general ni balance humano.
+
+**Resultado final del tramo:** §11 corrige la falsa movilidad125%: script+c
+mueve al rival en la ruta verificada, por eso el estándar conserva su valor
+nativo. Ataques/poses siguen retimados juntos. Suite64 y builds PASS, pero
+**sesión l FAIL** en combate2 frame11887, retorno2/watchdog12,4s. Pausa/save/load
+sí completos. kPASS descrito debajo es una revisión anterior. Diagnósticos
+privados l intactos, causa pendiente; hace falta observar la parada del hilo
+host (ciclos/insns quietos9s), no inventar un parche al juego ni silenciar watchdog.
+
+**Última comprobación 2026-10-18:** §10 de `COMBATE_REDISENO.md` sustituye
+guardia/IA/cierre anteriores. Máscara de divisor dos `0x40000000`, no `0x4000`.
+Dificultad efectiva `0x80072960+lado*0x24`, CPU=control bit0; preservar defensa
+nativa. Técnicas78..83 coste4/5 con tiempos/poses originales. **64 tests PASS**,
+ambos builds; sesión k: cuatro combates completos, pausa, estados rápidos
+save/load y salida0 sin terminate. Estados en carpeta temporal no prueban
+guardado nativo. Los cierres1 anteriores no demostraban salida normal: el
+instrumento mataba al perder respuesta de quit. Causa de starvation c aún abierta.
+Clips nuevos, rutas aéreas, locomoción y encuadre general siguen pendientes.
+
+**Actualización 2026-10-18:** leer `COMBATE_REDISENO.md` §9 antes de usar §8 o
+las notas del 17b. El contador de script es descendente. Hit-stop usa filtros
+de eventos/pose; cancelaciones con confirmación por daño y recuperación real.
+Ráfagas básicas: 125%, 64 VBlanks, choques 3D y coste/daño 3/4. Cámara de KO
+directa 8%/24 VBlanks. Caché `cg18_1b6950cb_gc2c269e7c_f0` (1.158 DLLs), 58
+tests/33 grupos C y matriz integrada de 942 variantes. **Unlock: `0x8003BCC4`**
+(inmediato con signo), START debug **`0x0008`**. Ambos corregidos y 17 retratos
+vistos en una sesión real. Sigue experimental; no hay animaciones/poses nuevas
+ni balance humano. `tools/combat_smoke.py` hace una sesión temporal acotada y
+cierra solo su propio proceso; `tools/combat_moves.py --cards` da fichas estáticas.
+
+- Leer `COMBATE_REDISENO.md`: el usuario pide **un único mod activar y jugar**,
+  cuyo estándar final sea bueno sin elegir ajustes. Las reglas aisladas son
+  herramientas de desarrollo, no el producto. El catálogo público tiene
+  `standard`; el manifiesto viejo se conserva en `mods/development/`.
+- El rediseño incluye mecánicas, movimientos, transiciones y animaciones. No
+  declarar acabado con inputs, velocidad y ki. B3 HD se estudia en
+  `../DBZ Budokai 3 HD Collection/` (port Xbox 360/ReXGlue) como referencia real
+  de curvas/eventos/reacciones, sin modificar ese proyecto.
+- Perfil inicial implementado y probado sintéticamente: buffer 2 VBlanks,
+  velocidad nominal 125%, +1 ki/4 sondeos y umbral acotado 9→12; no es el balance
+  definitivo. Pausa real `0x800A868C`, probada contra código/capturas; reanudación
+  automática, sin reactivar el mod tras pausar.
+- Tabla de opcodes: la base es `0x8003E78C`; animación/acción 0x20, spawn 0x23,
+  velocidad 0x24, golpe 0x25. Los números antiguos desplazados no deben reutilizarse.
+- `tools/combat_assets.py` lee/descomprime Psdp sin extraer activos. Bloques no
+  equivalen a animaciones; no hay inventario verificado de clips todavía.
 
 - **Disco de Final Bout (referencia de RE):** `disc/` (EXE `SLUS_004.93` y
   overlays `STEP*.BIN`; el de combate es `STEP40.BIN`, miembro en offset

@@ -1,5 +1,464 @@
 # DBFinalBout Recomp — Session Summary
 
+## 2026-10-19: visual revisado por el agente, R7 y publicación experimental 0.2.0
+
+- Render real del settle: 71 capturas; montaje 2896–2907 revisado por el agente,
+  brazo/mano unidos, postura final estable, sin rotura observada. Pausa dentro
+  del clip + guardar/cargar conserva exactamente el contexto y reanuda.
+- Cámara: 13 pares ON/OFF, 26 imágenes revisadas; par relativo 145 con 124 bytes
+  de control idénticos en ambos luchadores y encuadre más abierto. Los otros
+  pares divergen, por lo que NO hay PASS determinista global. En vuelo hay
+  recortes tanto ON como OFF, registrados como límite.
+- Matriz del ZIP ampliada: estándar/PGXP PASS; original dos watchdog con
+  sampler=0 (frames 9781/17850), otra sesión de 300 s PASS con dos combates y
+  otra sin crash pero sin KO suficiente. **R0 general reabierto**, sin causa
+  asignada. Reporte añade tiempos de carga existentes para atribución futura.
+- Empaquetado corrige Python auxiliar incompleto, valida herramientas locales
+  portables, 1158 DLLs, catálogo público apagado, ausencia de datos privados y
+  CRC/SHA256. Fuentes del núcleo commit `835f1902` publicadas en el fork.
+- 112 tests/36 grupos C OK, 26 comprobaciones watchdog OK, builds normal/PGXP
+  y offline PASS. Comandos y resultados completos en roadmap §9.
+- R7 cerrado como integración/entrega **experimental**, con límites explícitos,
+  sin exigir verificación humana ni afirmar que R0–R6 estén globalmente cerrados.
+- Autorización de usuario: commit + push + release. Versión 0.2.0; notas en
+  `RELEASE_NOTES_v0.2.0.md`, paquete Windows compilado, no setup-host.
+- ZIP final extraído y probado: original 300 s/2 combates, estándar 180 s/1,
+  PGXP 180 s/1; **3/3 PASS**, pausa/estados, salida 0, sampler=0 y autocompile
+  correcto. Los fallos previos siguen registrados. ZIP 83.480.650 bytes,
+  SHA256 `c1e17b089f3d5868c1970575b50344b74a576060b73022466b6bb1f2aabcfb6d`.
+
+## 2026-10-19 (segunda tanda): R3 integrado y probado; R4 implementado; R5/R6 medidos; R1 cerrado
+
+- **R3 (transición de clip):** integrada como settle nativo
+  (`src/mods/dbfb_pose_settle.h` + llamada en `motion_build`, `dbfb_motion.h`):
+  clona la pista 105 de la acción 6 del registro 0 con dos paquetes relativos
+  nuevos (partes 8/9) que telescopan a cero, conserva todo lo original y publica
+  un slot nuevo. Oráculo offline (handoff exacto módulo-16) y **prueba en
+  partida** con sonda: la acción 6 apunta al slot creado 245, no al nativo 105
+  (solo el settle escribe esa entrada). Límite: sin comprobación visual a ojo.
+- **R4 (cámara general):** el seam correcto es `0x80054F88` (tras las
+  reescrituras nativas; `0x80054F34` se perdía). Nuevo
+  `src/mods/dbfb_camera_frame.h`: escala solo el vector ojo→objetivo nativo
+  (17/16) con guardas (modo/lock/transición/KO/pausa/online/rango) y contador
+  `camera_framing`. Requirió sitio nuevo en `game.toml` + **recompilación de
+  overlays** (1158 OK, 8 rechazos kernel conocidos) → namespace
+  `cg18_1b6950cb_gc164a1e9a_f0`, `verify_offline` PASS. Partidas A/B: ON 435
+  aplicaciones, `DBFB_CAMERA_FRAMING=0` 0; capturas en combate con render
+  correcto. Límite: A/B visual exacto del 6,25 % no demostrado.
+- **R5 (fichas medidas):** `tools/combat_cards.py` mide startup/recuperación/
+  ventaja/hit-stop en VBlanks reales; cuadrado 0x72/0x73 startup 17-20 VB,
+  ventaja 2-40, hit-stop 4 VB (n=3-6); triángulo 0x64/0x65 startup 14-23.
+  Círculo/cruz/aéreos sin muestras válidas. 20 tests nuevos.
+- **R6 (dificultad):** 0/1/2 verificados en partida (stores nativos
+  `0x80053DE4`/`0x80053EFC`, 100 % de muestras); acciones CPU/minE 28,0/37,4/
+  42,7. Cadencia extra del mod no distinguible (gate cerrado). Balance humano
+  no automatizable.
+- **R1:** cadena `cmd29/ID6 →0x200→0x98→0x80→0x9B` capturada completa con
+  wtrace (PCs/seq exactos) y ventana pausa/restore observada sin corrupción.
+- **Verificación:** **111 tests OK** (36 grupos C), build exit 0,
+  `verify_offline` PASS (1158 DLLs), `combat_camera.py --check` PASS, 13
+  sesiones de verificación con salida 0. Detalle en
+  `ROADMAP_RELEVO_COMBATE.md` §8. Sin commit/push.
+
+## 2026-10-19: R0 corregido de clase; R1 cmd25 entregado; R2–R4 avanzados
+
+- **R0 (bloqueo intermitente):** el muestreador de host suspendía el hilo de
+  emulación desde otro hilo, sin cota de latencia; causa del congelamiento `l`.
+  Arreglo de clase en runtime genérico: sampler suspend-based de Windows ahora
+  **opt-in** (`PSX_HOST_SAMPLER_SUSPEND=1`), apagado por defecto; watchdog intacto.
+  Nuevos `runtime/tests/test_host_sampler_policy.c`, registro en CMakeLists y
+  `tools/tests/test_host_sampler_policy.py`. Sesiones con `max_suspend_us=0`.
+- **R1 (remates aéreos):** causa del no-inject observada (el Circle final del
+  gesto25 arrancaba el normal `6A` y `control+0` bit8, impidiendo armar `0x20`).
+  Mejora real: `followup_lift()` sustituye solo los argumentos de entrada nativos
+  para que el motor original haga el despegue, y luego entrega `25` por
+  `control+0x56`. Observado en partida ambos lados: `25→20→98→80→99` y `98→9A`;
+  vs CPU 32/26, ambos humanos 18/18. Contadores de motivo añadidos. Pendiente:
+  `cmd29/ID6→200→9B`.
+- **R2/R3 (movimiento/clips):** geometría decodificada (18 registros, 425 piezas,
+  14.755 polígonos), cadena modelo→parte→jerarquía y `Rx·Ry·Rz` contra `RotMatrix`;
+  anatomía observada solo registro 0. Transición propia de pose slot2→1 (6 ticks,
+  smoothstep, 3984 bytes) en `src/mods/dbfb_rig_bridge.h`; herramientas
+  `combat_rigclip.py`/`combat_rig_preview.py`. No integrada/renderizada aún.
+- **R4 (cámara):** propiedad del contexto `0x800A9FA0`→`0x800A9D0C` y rama general
+  `0x80054EC4` mapeadas; sonda de solo lectura `src/mods/dbfb_camera.h` +
+  `tools/combat_camera.py`. Sin encuadre implementado.
+- **Verificación:** `python -B -m unittest discover -s tools/tests -p "test_*.py"`
+  → **86/86 OK** (35 grupos C); build normal+PGXP PASS; `verify_offline.py` PASS
+  (`cg18_1b6950cb_gc58692d0b_f0`, 1157 DLLs); `combat_camera.py --check` PASS;
+  partida `dbfb-final-20261019` (420 s): 4 combates, pausa, save/load, locomoción,
+  salida 0, `max_suspend_us=0`; `git diff --check` exit 0.
+- Detalle completo en `ROADMAP_RELEVO_COMBATE.md` §7. Sin commit/push.
+
+## 2026-10-18: relevo persistente y continuación de R1
+
+- Usuario pidió seguir el roadmap y dejar un relevo para otro modelo antes de
+  continuar. Creado `ROADMAP_RELEVO_COMBATE.md`, enlazado en AGENTS/HANDOFF:
+  tareasR0–R7, criterios, comandos, estado y prompt transferible. No delegación
+  efectiva ni agentes lanzados.
+- Continuación real: cmd25/fila32/607A0 conecta flags20/40→98/AA, con delay
+  slot; cmd28/29/2B/2C completan accesos por ID. Productores80 en
+  62FF4/63030/63228 y200 en60AAC; consumidor576BC→9B/99/9A, limpia flags y
+  publica candidato sp+48 en57F94. IDs nativos no equivalen a índices BTCHARA.
+- Nuevo `combat_map.py routes` genera metadatos con hash/base USA exigidos;
+  código de lectura, sin hooks/parches nuevos. Opcode61 corregido a
+  `audio_channel_event` en `combat_moves.py`: no produce banderas del luchador.
+- Nuevos `tools/tests/test_combat_routes.py` y caso en `test_combat_moves.py`.
+  `python -B -m unittest discover -s tools/tests -p "test_*.py"`: **69/69PASS**,
+  34gruposC,matriz942/432técnicas siguen verdes. `combat_map.py routes` ejecutado.
+- Docs ampliadas: MAPA§9, REDISENO§13, EVIDENCIA y este resumen. No se inició
+  partida nueva; n sigue siendo evidencia anterior. Próximo experimentoR1:
+  wtrace control+4/+8 en ambos lados, gesto nativo dentro de flags20/40,
+  correlación de PCs/seq, sin inyectar RAM. Instrucciones exactas en relevo§6.
+- R0(l/c) sigue sin causa; no declarar rediseño/remates nuevos terminados.
+
+## 2026-10-18: locomoción propia observada; m/n PASS; bloqueo l sin causa
+
+- NUEVO `src/mods/dbfb_locomotion.h`: callback0x80067A68/mult s0,v0 cambia
+  delta propio de raíz antes de proyección/separación; objetivo5/4, aceleración40
+  y frenado64 porVBlank, ambas direcciones/lados. No usa script+c ni posiciones.
+  Registro añadido en responsive, reset encombat_reset y sitio en game.toml.
+- `test_responsive.py`/harness ahora22bloques privados,34gruposC, incluye
+  cadencia, frenado, límites, pausa/KO/restore/online sin escrituras de RAM.
+  `test_combat_matrix_harness.c` acepta22bloques. Suite **65/65PASS**.
+- `combat_smoke.py`: `--movement`/`--summary`, contadores en cada captura
+  conservados ante crash, movimiento observado obligatorio cuando solicitado.
+  Test adicional del veredicto. Sesión **n PASS**420s/4382:cuatro combates,
+  pausa,save/load y salida0;5321locomotion,34465framesalúltimosondeo,
+  144técnicas,91transiciones,25ráfagas,200/200hit-stop. Evidencia privada n.
+- `host_sampler.[ch]` mide intervalo suspend/context de Windows, sin alterar
+  watchdog/timing. `debug_server.c` expone `host_profile.max_suspend_us`;
+  `crash_trace.c` serializa `host_sampler_max_suspend_us`. mPASS4combates antes
+  de locomoción:123400µs; n:173844µs. **No resuelve l**, que no reapareció.
+- Ghidra/JDK existentes localizados por registro de otro cliente. ProbeMCPREA
+  207tools/binary_sessionOK vía entorno local; sin instalaciones ni cambios de
+  configuración. Archivo temporal `dbfb_rea_probe.py`; no sesión de binario abierta.
+- Ambos builds PASS. `compile_overlays.py` con vault182capturas: primera
+  llamada timeout600s; continuación8workers terminó con624built/250skipped/
+  **8rechazos**audit/memo enkernelregiones1000/2000. No se debilitóauditoría.
+  Namespace nuevo `cg18_1b6950cb_gc58692d0b_f0`,1157DLLsconranges;
+  verify_offline PASS, config15663bytes. No afirmar todosshardsPASS.
+- Comandos finales:
+  `python -B -m unittest discover -s tools/tests -p "test_*.py"` PASS65;
+  `cmake --build build-release --target psx-runtime psx-runtime-pgxp -j 4` PASS;
+  `python -B tools/combat_smoke.py --launch --port 4382 --seconds 420 --kos 3 --savestate --movement --summary --out <temp>/dbfb-rework-smoke-20261018n` PASS.
+- Docs §12 y evidencia actualizadas. Pendientes verdaderos: bloqueo l,
+  rutas/remates aéreos, clips totalmente nuevos/anatomía, giro, encuadre general,
+  balance humano. No declarar rediseño terminado.
+
+## 2026-10-18 (último resultado): l FAIL, corregida la falsa movilidad125%
+
+**No declarar acabado ni estable:** tras el cambio final, 64 tests y builds
+normal/PGXP PASS, pero smoke **l FAIL** en segundo combate frame11887,
+retorno2 por watchdog (12.414.350µs). Pausa y estados rápidos save/load PASS,
+un combate completo. k sigue siendo evidencia anterior, no del binario actual.
+
+- `script+0x0C` no demuestra locomoción: opcode24 lo produce, consumidor
+  `0x8006639C` toma s2=lado y s4=contrario (`0x800663BC`), mueve objeto de s4.
+  El estándar ya usa `SPEED_ORIGINAL` para ese campo. Test estándar exige
+  100/−100; laboratorio conserva prueba125/−125. Manifiesto deja de anunciar
+  movilidad125%; el ritmo de ataques/poses sigue por su reloj compartido.
+- Locomoción propia localizada: `0x800678D0` extrae delta de raíz, lo gira y
+  aplica separación antes de control+2C/+34. Ninguna acción0..23 contiene op24
+  en18registros. Falta mapear entrada/bucles/traslación. Cámara general tiene
+  otra rama (`0x800AA194==1`); conversión relativa en `0x800506C8` con matriz
+  de nodo y truncado signed16. Ver §11 del rediseño.
+- Evidencia nueva `%TEMP%/opencode/dbfb-rework-smoke-20261018l/`: reporte,
+  ring, heartbeat, dos dumps automáticos previos y tarjetas temporales intactos.
+  Ring gap12.414.691µs, distinto de c266µs. 63 muestras mantienen frame11887,
+  ciclos6707853641, dirty_insns11602342; luego avanzan47.458ciclos/117insns.
+  Compatible con pausa del hilo host o trabajo nativo sin ciclo, no prueba un
+  bucle MIPS. Finalstore80041AC8=SWC2, next=LWC2; native stack incluye
+  psx_gte_stall/psx_cyc_lwc2_read/devices_service/watchdog/exit. Stack es barrido,
+  no unwind fiable. current_func no es PC instantáneo.
+- Host sampler Windows compilado usa SuspendThread/GetThreadContext/ResumeThread
+  cada1ms; candidato para investigar, **sin causalidad demostrada**. WPR/WPA
+  instalados; próximo experimento decisivo: traza CPU/planificación de la
+  reproducción para separar suspensión/espera de cómputo nativo. No se lanzó
+  captura global del host, no se tocó core ni se silenció/amplió watchdog.
+- Últimos comandos: suite64PASS, ninja normal y PGXP PASS;
+  smoke `--port 4380 --seconds 420 --kos 3 --savestate --out <temp>/dbfb-rework-smoke-20261018l`
+  FAIL. Archivos añadidos a los cambios de §siguiente: `dbfb_responsive.c`,
+  manifiesto, test estándar y docs §11. Verificador offline y diff-check son
+  independientes de este fallo en ejecución y no lo cierran.
+
+## 2026-10-18 (cierre actual): guardia correcta, dificultad, técnicas y cuatro combates
+
+- **64/64 PASS**, 33 grupos C, matriz 942 variantes, 432 scripts de técnicas
+  comprobados. Ambos exe normal/PGXP compilados. Sin commit/push.
+- **Bug de defensa corregido:** `0x80066DC8 = lui v0,0x4000`; máscara del divisor
+  dos = `0x40000000`, NO `0x4000`. Corregidos helper y flag de rotura en
+  `dbfb_combat.h`; tests de disco y casos bit14/bit30/signo actualizados.
+- **Dificultad probada estáticamente:** opción byte `0x8003BC74`, menú cursor−2
+  (índices 0..2); copia por lado `0x80072960 + lado*0x24`, forzada a 2 en modos
+  0x43/44/45. Stores `0x80053DE4/53EFC`, consumo IA `0x800509BC/50D40`.
+  `0x80034FD4` es flags, no dificultad.
+- **IA corregida:** ownership CPU = `control & 1` (`0x800549C8`), no presencia
+  de un mando digital. Solo CPU J2 frente a humano J1. Cadencia extra de diseño
+  150/120/90 VBlanks por índice; pausa e hit-stop la preservan. No reemplaza
+  comando original, botones de `sp+10/14`, outputs almacenados, temporizador,
+  decisiones C8/C9, guardias ni respuestas ante amenaza. Los comandos 0/1 son
+  técnicas especiales, no golpes básicos. 1 inyección observada en sesión k.
+- **Técnicas `78..83`:** scripts privados con coste positivo del op84 a 4/5;
+  tiempos, poses, daño y sincronía nativos. Familias directas 78..7A/7E..80;
+  coordinadas 7B..7D/81..83 (selector `0x8005F2C4` altera también al rival).
+  Contador nuevo `technique_variants`. No reciben cancelación ni daño de clips
+  retimados. `combat_moves --cards` muestra handler, familia y coste; op60 es
+  `audio_bank_event`, no un salto de acción.
+- **Prueba larga k PASS** (420s, puerto4379): 4 combates vida→KO→menú, pausa
+  0→1→0, save/load completados (generaciones1/2, last_ok1), salida normal0.
+  38.818 frames, 144 variantes de técnicas (incluye rebuild tras load), 96
+  transiciones, 48 ráfagas, 289/289 script/pose detenidos, 4 cancelaciones,
+  12 guardias, 1 just/1 perfect. 23.488.190 despachos nativos/1.839.401 interp.
+- **Corrección del instrumento:** `combat_smoke.py` usa duración completa,
+  exige KO + vida→cero→menú, pausa, salida0 sin terminate y, con `--savestate`,
+  completitud real. Perder ACK de quit no significa que haya que matar el proceso;
+  espera su salida. h: cuatro KO pero FAIL del cierre; i: FAIL por screenshot
+  con display desactivado (ahora se anota como omitida); j: 3KO/save/load/salida0;
+  k: PASS completo con binario actual. Evidencia privada h/i/j/k intacta.
+- Estados rápidos en tarjetas temporales **no** prueban el guardado nativo en
+  tarjeta. No reapareció watchdog, pero la causa histórica de c sigue sin
+  demostrar. Siguen pendientes clips completamente nuevos/anatomía, rutas y
+  remates aéreos, locomoción propia, encuadre general/relativo, nombres/medidas
+  nominales y balance humano. §10 de COMBATE_REDISENO.md detalla límites.
+- Archivos cambiados en este tramo: `src/mods/dbfb_combat.h`, `dbfb_motion.h`,
+  `tools/combat_moves.py`, `combat_smoke.py`, tests `test_responsive.py`,
+  `test_responsive_harness.c`, `test_combat_matrix_harness.c`,
+  `test_motion_harness.c`, `test_combat_moves.py`, nuevo `test_combat_smoke.py`,
+  manifiesto de dbfb.responsive y docs de estado.
+- Comandos de verificación: `python -B -m unittest discover -s tools/tests -p "test_*.py"`;
+  `ninja -C build-release DBFinalBout_Recompiled.exe` y target PGXP por separado;
+  `python -B tools/combat_smoke.py --launch --port 4379 --seconds 420 --kos 3 --savestate --out <temp nuevo>`.
+
+## 2026-10-18 (cont.): transiciones de pose nativas, watchdog y pausa real
+
+**Último resultado real:** 58/58 tests PASS, builds normal/PGXP PASS y
+`verify_offline.py` PASS. Sesiones headless nuevas: **e** y **g** completaron
+boot → menú → combate → KO → regreso a menú sin reincidir el watchdog (f quedó
+en combate tras su sonda de pausa).
+
+- **Transiciones de pose nativas** (`src/mods/dbfb_pose.h`): el análisis de los 18
+  registros probó que los clips ya traen una muestra por tick y que casi todos los
+  ángulos son incrementos relativos; insertar huecos era inviable. La vía
+  respaldada por los datos es **reperfilar una muestra interior existente** entre
+  dos anclas de recuperación con correcciones angulares relativas compensadas
+  (`+c`/`−c`, cabecera `0x03310000|parte`), que se cancelan al ancla siguiente
+  para cualquier pose de entrada. Conserva tiempos, eventos, traslación, escala,
+  geometría, jerarquía y poses de extremo. Contador renombrado
+  `dbfb.responsive.pose_inbetweens` → `pose_transitions` (17 en la sesión g).
+- **Watchdog:** el dump de c mostraba un heartbeat de **266 µs** al escribir la
+  cabecera, compatible con un refresco concurrente que dejó evidencia obsoleta.
+  `starvation_watchdog_check` ahora hace doble lectura
+  (`starvation_watchdog_confirmed_stale`) y solo aborta si ambas lecturas están
+  vencidas; no se silencia ni amplía. Arnés **26/26 PASS**.
+- **Pausa real verificada en partida** (sesión g): `tools/combat_smoke.py` sondea
+  `0x800A868C`; START la alterna 0→1→0 y el perfil suspende/reanuda escrituras
+  solo. Sesión g: 17 transiciones, 24 frames de cámara de KO, 1 cancelación,
+  3 comandos de IA, 10.472 frames.
+- Evidencia privada en `%TEMP%/opencode/dbfb-rework-smoke-20261018{e,f,g}/`. El
+  fallo intermitente c **sigue abierto** como bloqueo de entrega: las repeticiones
+  no lo reproducen, pero tampoco demuestran su causa.
+
+## 2026-10-18: reloj corregido, ráfagas, KO, matriz y desbloqueo real
+
+**Último resultado real:** 58/58 tests, ambos builds y verificación offline PASS,
+pero sesión **c FAIL** en menú, frame 3.303, retorno 2 por `starvation_watchdog`
+(>10 s sin heartbeat). Espera alrededor de `0x8001BD34/68` y OpenBIOS
+`0x1FC060E4`, `I_STAT=0`, sin mid-block ni unknown dispatch. Causa no demostrada.
+La repetición **d**, mismo binario, sí completó combate/KO/regreso al menú en
+14.818 frames: 10 nacimientos de ki, 280 ajustes de velocidad, 35/35 llamadas de
+eventos/pose detenidas, 24 frames de KO y 10.019.954/817.311 despachos
+nativos/interpretados. Esto NO cierra el fallo intermitente c. Evidencia intacta
+en `%TEMP%/opencode/dbfb-rework-smoke-20261018{c,d}/`. Priorizar ese bloqueo antes
+de declarar entrega final; no se cambió ni silenció el watchdog.
+
+- **Correcciones críticas de la entrega anterior:** `script+4` es cuenta atrás
+  por evento (no tiempo acumulado). Hit-stop pasa a filtros de `0x8004E530` y
+  `0x80042240`, únicamente para los dos luchadores. La cancelación usa puntero
+  privado, cierre final de ataque, cola visual y confirmación por daño sin
+  bloqueo; descarta confirmaciones al repetir acción. La reducción de daño solo
+  empieza tras publicar la variante completa. Pausa conserva temporizadores.
+- `dbfb_projectiles.h` nuevo: eventos de nacimiento reales (`0x8004F5A0`),
+  velocidad 256→320 antes de integrar (`0x800592A8/0x800592FC`), 64 VBlanks de
+  duración y choques barridos 3D para ráfagas básicas `0x72..77`. Retirada por los
+  flags nativos, sin dejar el bit de propietario atascado. Paso de objetos
+  observado en vivo **21** (no asumir 36 fijo); admitido 17..36.
+- Coste positivo de ki de esas variantes a 3/4 como su daño; conservar sentinelas
+  y otros operandos. Cámara propia de KO: acercamiento máximo 8%, 24 VBlanks,
+  restauración y cesión inmediata al motor si emite un plano nuevo (solo directo).
+- **Unlock corregido y verificado en pantalla:** `lui 0x8004; sw -0x433c` da
+  `0x8003BCC4`, no `0x8004BCC4`. START del protocolo debug es `0x0008`. La sesión
+  `dbfb-rework-smoke-20261018b` muestra 17 retratos en `004-menu.png` y word
+  `0x1FFFF`, una activación del contador. Las conclusiones de dirección de la
+  sesión anterior eran erróneas; leer `DESBLOQUEO.md` actualizado.
+- Pruebas: **58/58 PASS**, **33 grupos C**, matriz integrada de **942 variantes**
+  en 18 registros/ambos lados (716 recuperaciones, 226 sin cancelación añadida),
+  y ráfagas en los 17 registros con variantes básicas. Fichas estáticas/costes
+  disponibles con `python tools/combat_moves.py --cards`; no inventan nombres ni
+  frames de ventaja.
+- Overlays: **1.158 DLLs** en `cg18_1b6950cb_gc2c269e7c_f0`; siguen los ocho
+  rechazos conservadores de IRQ/BIOS (la herramienta informa fallos, no pase
+  completo). Ambos runtimes normal/PGXP reconstruidos.
+- Sesión real b: 9.572 frames muestreados; 6.135.743 despachos nativos/501.584
+  interpretados. 8 nacimientos de ráfaga, 290 ajustes de velocidad, 2 expiraciones,
+  31 llamadas de eventos y 31 de pose detenidas, 1 cancelación y 24 frames de KO.
+  Los choques entre ráfagas solo se verificaron sintéticamente. Cierre mediante
+  debug devuelve 1; no confundirlo con salida normal del usuario ni playtest.
+- Evidencia privada: `%TEMP%/opencode/dbfb-rework-smoke-20261018{a,b}/`.
+  Herramienta reproducible nueva `tools/combat_smoke.py` (tarjetas temporales,
+  sin editar RAM/selección de mods y limpieza del proceso al terminar).
+- **No cerrado al 100%:** siguen pendientes poses/animaciones nuevas y huesos,
+  medidas/nombres por golpe, rutas aéreas/remates, IA por dificultad, cámaras
+  relativas/encuadre general, técnicas especiales, balance humano y tres
+  combates/guardados. `COMBATE_REDISENO.md` §9 es el estado vigente.
+- Archivos de esta tanda: `src/mods/dbfb_{responsive.c,motion.h,combat.h,projectiles.h}`,
+  `game.toml`, manifiesto responsive, `tools/combat_{moves.py,smoke.py}`,
+  `tools/tests/test_{responsive.py,responsive_harness.c,motion_harness.c,combat_moves.py,combat_matrix.py,combat_matrix_harness.c}`
+  y documentación de combate/desbloqueo/memoria. Sin commit ni publicación.
+- Comandos de comprobación: `python -m unittest discover -s tools/tests -p
+  'test_*.py' -v`; `cmake --build build-release --target psx-runtime -j 4`;
+  `cmake --build build-release --target psx-runtime-pgxp -j 4`;
+  `python tools/verify_offline.py`; `git diff --check`.
+
+## 2026-10-17b: defensa, impacto, cancelación, IA y cámara sobre costuras verificadas
+
+- Nuevo punto de enganche `0x80054A60` (`lh a0,+0x2856(at)`, `0x84242856`),
+  antes de que la puerta lea el comando, añadido a `mod_instruction_sites`.
+  Overlays recompilados en el namespace nuevo `cg18_1b6950cb_gc41ea2caf_f0` con
+  **1.158 DLLs** (`ok=1158 failed=8 skipped=330`; los 8 siguen siendo IRQ/BIOS).
+- `src/mods/dbfb_combat.h` (nuevo) implementa, siempre tras `standard_code()`:
+  defensa reproduciendo la prueba de bloqueo nativa (acción `0x21/0x22/0x23` y
+  máscara del word `+0x2900` del atacante) con medidor de guardia, rotura,
+  just-guard (cuarto + ki) y perfect-guard; hit-stop que resta un tick a ambos
+  relojes de script; empuje vectorial en las dos copias de posición con tope
+  ±7000; sacudida de cámara acotada sobre `0x800A8664/0x800A8668` solo con
+  `0x800A8680 == 0`; cancelación en recuperación tardía con impacto confirmado
+  (`+0x2800` bit `0x10`); IA que inyecta un comando real (`0x00/0x01`) en
+  `+0x2856` del lado 2 antes de la puerta, con cooldown, rango y desactivación si
+  hay segundo mando; y prorrateo de combo.
+- `dbfb_motion.h` guarda la línea de tiempo retimada por acción
+  (`motion_total_ticks`) y expone `motion_clip_live`; el daño y la cancelación
+  solo actúan si la tabla privada está publicada y la acción tiene clip retimado.
+- Pruebas: **54/54 PASS**, **31 grupos C**; `cmake --build build-release --target
+  psx-runtime psx-runtime-pgxp` PASS; `verify_offline.py` PASS con 1.158 DLLs.
+- **Sesión real headless** (sin mandos humanos): `fatal=no`, sin volcados de
+  freeze nuevos, 91% de despacho nativo. Contadores nuevos observados en combate:
+  7.204 sondeos de combate, 216 variantes de movimiento, 40 empujes, 40 daños,
+  108 frames de hit-stop, 346 sacudidas de cámara, 27 comandos de IA, 6 entradas
+  de guardia, 2 bloqueos y 3 golpes prorrateados. No mide sensación humana.
+- Siguen abiertos: fichas nominales por golpe, animaciones nuevas, velocidad/vida
+  de proyectiles, cámara de KO propia y balance fino.
+
+## 2026-10-17 (cierre): caché regenerada, primera partida real del estándar y daño coherente
+
+- **Caché de overlays regenerada** con los puntos de integración nuevos
+  (`mod_instruction_sites`): **351 shards construidos**, 214 omitidos por
+  caché/datos y **8 rechazos de auditoría** en regiones IRQ/BIOS
+  (`0x80001000`, `0x80002000`, interiores `0x80001F6C/27AC/27F8/2818`) por
+  instrucciones no soportadas. Esos fragmentos siguen interpretados; el STEP40
+  de combate sí compiló. Una DLL temporal incompleta de una ejecución
+  interrumpida se movió a `build-release/backup/overlay-interrupted-20261017/`
+  (no se borró nada).
+- **Verificador corregido:** `tools/verify_offline.py` exigía una única carpeta
+  `cg18_…` y fallaba al coexistir la caché anterior y la nueva. Ahora pregunta
+  al serializador canónico del framework (`cache_tag`) qué namespace cargará el
+  runtime y verifica solo ese. Resultado: **1.157 DLLs con `.ranges`**.
+- **Primera sesión real del perfil estándar (headless, automatizada):**
+  arranque → menús → combates, **132.905 frames**, cierre `tcp_quit`/`atexit`,
+  `fatal=no`, `unknown_dispatch_total=0`, `midblock_count=0`,
+  `empty_irq_callback_returns=0`, sin volcados de freeze nuevos.
+  `dispatch_native=37.565.732` frente a `3.698.052` interpretadas (**91% nativo**).
+  Contadores del estándar activos: 594 variantes de movimiento, 11 parches de
+  ventana, 2.864 ganancias de ki, 514 ajustes de velocidad y 47 daños ajustados.
+  No es una prueba de sensación humana: los mandos fueron sintéticos.
+- **Corrección de coherencia (daño ↔ animación):** el daño se reducía por el
+  reloj acortado aunque la variante de animación no se hubiera podido instalar
+  (movimiento ausente/alias, o tabla privada aún no publicada). `dbfb_motion.h`
+  registra qué acciones seleccionadas no se recompusieron y
+  `standard_damage` solo escala cuando la tabla privada está publicada y la
+  acción sí tiene clip retimado; si el compilador nunca actuó, el daño sigue
+  siendo el original. Cubierto por el arnés de movimiento con datos reales.
+- Comprobaciones: **54/54 tests PASS** (28 grupos C del plugin y el arnés de
+  movimiento de los 18 registros), builds normal y PGXP enlazados,
+  `verify_offline.py` PASS. La caché validada es
+  `cg18_1b6950cb_gcb5146b81_f0` con 1.157 DLLs.
+- Límites sin cambios: defensa/guardia, IA, cámara, proyectiles avanzados y
+  animaciones nuevas siguen abiertos; el estándar no se declara definitivo.
+
+## 2026-10-17: directriz activar y jugar, perfil estándar y estudio de animaciones
+
+- El usuario precisó el objetivo: estándar muy bueno sin configuración y
+  rediseño mecánico potente, incluidas animaciones. Nueva referencia rectora:
+  `COMBATE_REDISENO.md`; directriz recogida también en `AGENTS.md`.
+- Catálogo público: una sola feature `standard` (**Combate renovado**) sin
+  opciones. Traza separada en desarrollo. Manifiesto previo conservado en
+  `mods/development/dbfb.responsive-legacy.toml`; no se borran selecciones del
+  usuario. Se retiran del catálogo los interruptores individuales del laboratorio.
+- Plugin estándar independiente: buffer de 2 VBlanks, velocidad nominal 125%,
+  +1 ki/4 sondeos válidos y umbral de aceptación 9→12 en `0x80054AC0`.
+  No usa el parche incondicional de Open. Guardas de identidad de todas las
+  partes, supresión de reglas duplicadas en el mismo VBlank y restauración
+  de estado auxiliar al cargar un guardado.
+- Pausa nativa mapeada en `0x800A868C`: inicialización `0x800540FC`, toggles
+  `0x8006A178/180` y `0x8006A220/22C`, consumidor `0x8006A2F8/300`.
+  El estándar deja de escribir al pausar, vacía entradas pendientes y vuelve a
+  funcionar cuando el juego confirma que se ha reanudado; no exige reactivar.
+- Traza: dos registros mecánicos adicionales kind=4 por sondeo, con acción,
+  flags2, script, reloj/opcode, HP/ki y velocidad/contador de puerta; solo lectura
+  de luchadores y escrituras en el ring diagnóstico.
+- Estudio real de B3 HD, solo lectura: `src/combate.cpp`,
+  `docs/03_formatos/ACM_FORMAT.md`, `docs/14_frentes/combate.md`,
+  `studies/tools/frame_data.py` e instrucciones/índice del proyecto. Es el port
+  Xbox 360/ReXGlue, no solo PS2. Se adopta la separación curvas → eventos →
+  reacciones y medición de arranque/recuperación/guardia/whiff. No se han copiado
+  activos ni cambiado el proyecto de B3.
+- Herramientas: `tools/combat_map.py` añade inventario ISO e inmediatos;
+  `tools/combat_assets.py` reproduce de forma acotada el descompresor Psdp
+  leído del STEP40, sin extraer archivos. BTCHARA: 2.650 bloques / 12.868.520
+  bytes descomprimidos; CHARSEL: 72 / 2.095.968. No se halló una tabla de acciones
+  con el filtro estructural actual; no se confunde ese resultado con ausencia
+  de animaciones. Falta resolver contenedores/enlace a los scripts en RAM.
+- Corrección del mapa: tabla en `0x8003E78C`; opcode animación/acción 0x20,
+  spawn 0x23, velocidad 0x24 y registro de golpe 0x25. Las etiquetas anteriores
+  estaban desplazadas; las direcciones de campos de las reglas no cambian.
+- Comprobaciones ejecutadas:
+  - `python -m unittest discover -s tools/tests -p test_*.py -v`: **46/46 PASS**,
+    con **26 grupos C** y 6 tests del lector de recursos.
+  - `cmake --build build-release --target psx-runtime psx-runtime-pgxp -j 4`:
+    **PASS**, ambos ejecutables y catálogo actualizado/verificado.
+  - `python tools/verify_offline.py`: **PASS**, configuración idéntica y caché
+    de **1.117 DLLs** conservada. No se modifica `game.toml` ni el codegen.
+- No se lanzó el juego ni se añadieron animaciones; estándar inicial integrado
+  no equivale a estándar definitivo ni cierra el rediseño. Los criterios y el
+  siguiente bloqueo están explícitos en `COMBATE_REDISENO.md`.
+
+## 2026-10-17: integración pendiente de las tres reglas de combate cerrada
+
+- Se completó la implementación interrumpida en `src/mods/dbfb_responsive.c`:
+  `ki-economy`, `speed-scale` y `chain-window`, con opciones en el manifiesto de
+  `mods/preloaded/packages/dbfb.responsive/0.1.0/manifest.toml`. Default OFF y
+  modo inicial Original; callbacks independientes, offline, con contexto de
+  combate y comprobación de instrucciones verificadas.
+- Se corrigieron el reescalado al cambiar porcentajes, la restauración del valor
+  bruto al volver a Original, la aplicación diferida del parche hasta un sondeo
+  válido y su reconciliación al cargar un guardado de Open estando en Original.
+  Pausa suspende nuevas escrituras de reglas; ver límites en `COMBATE_MAPA.md`.
+- Se terminó el arnés de cinco plugins en `tools/tests/test_responsive_harness.c`
+  y se amplió `tools/tests/test_responsive.py` con cinco grupos funcionales de
+  reglas y comprobaciones de manifiesto. Los bytes de identidad adicionales
+  proceden de capturas privadas existentes pasadas por stdin; no se distribuyen.
+- Comandos ejecutados y resultado:
+  - `python -m unittest discover -s tools/tests -p test_*.py -v`: **40/40 PASS**,
+    incluidos **22 grupos C** del plugin real con `-Wall -Wextra -Werror`.
+  - `cmake --build build-release --target psx-runtime psx-runtime-pgxp -j 4`:
+    **PASS**, normal y PGXP enlazados y catálogo actualizado/verificado.
+  - `python tools/verify_offline.py`: **PASS**, fuente/desplegado idénticos,
+    caché vigente **1.117 DLLs**. No se modificó `game.toml` ni los overlays.
+- Documentación actualizada: `COMBATE_MAPA.md`, `COMBATE_EVIDENCIA.md` y este
+  resumen. No se abrió el juego; no equivale a validar combos ni mejor sensación.
+  Daño, IA, frame-data, ráfagas y modo alternativo siguen abiertos.
+- Cambios locales sin commit nuevo. La carpeta ajena `github/` sigue sin tocar.
+
 ## 2026-10-03: release v0.1.1 actualizada in situ y handoff a Claude
 
 - Se reconstruyó el paquete setup-host `dbfb-0.1.1-setup-host-win64.zip` con el
@@ -859,3 +1318,24 @@ usuario será la primera comprobación funcional.
 ## 2026-10-04: sesión autónoma Fase A/B (Claude)
 
 Ver `INFORME_CLAUDE.md`. Causa de `disp_native=0` (desajuste de hash de caché cg10/cg13), cobertura STEP40 baja y callbacks por evidencia `jal/jalr`, recuperación IRQ generalizada (sin verificar), plugin `dbfb.responsive` (trace + input-buffer experimental), `verify_offline.py` corregido.
+
+## 2026-10-18 (cont.): R1 — retención del remate aéreo, implementada y observada
+
+Estado vigente en `ROADMAP_RELEVO_COMBATE.md`, `COMBATE_MAPA.md` §9.1,
+`COMBATE_REDISENO.md` §14 y `COMBATE_EVIDENCIA.md`. R1 sigue **abierto**.
+
+- Se releyeron los bytes: el consumidor `0x80057608` acepta `0x98` y `0xAA`; el
+  handler `0x800607A0` escribe `control+8`; la puerta consume `control+0x56` en
+  `0x800570F8`→`0x800570FC` (`0x80056E54`), por lo que el hook `0x80054AE8` llega
+  en el mismo frame.
+- **Mejora implementada (una):** `standard_command` retiene un `cmd25`/`cmd29`
+  reconocido mientras `control+4` no tenga `0x20`/`0x40` y lo reinyecta por
+  `control+0x56` (máx. 16 frames) al aparecer la bandera aérea. Solo escribe
+  `control+0x56`. Contadores `followup_wait`/`followup_inject`.
+- **Pruebas:** 69/69 PASS, **35 grupos C** (nuevo escenario de retención). Builds
+  normal y PGXP PASS. `verify_offline.py` PASS, namespace
+  `cg18_1b6950cb_gc58692d0b_f0` (1157 DLLs, sin cambios). `git diff --check` OK.
+- **Partida privada** (`wtrace` exclusivo sobre `control+4`/`control+8`): retención
+  64×/16×; `followup_inject`=0; el consumidor no se ejecutó (faltan sus stores de
+  limpieza y los productores de `0x80`). No se ha mapeado qué entrada arma
+  `control+4` `0x20`/`0x40`. R1 abierto con ese bloqueo y experimento siguiente.

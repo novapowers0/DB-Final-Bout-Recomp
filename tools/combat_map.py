@@ -255,19 +255,119 @@ def inventory(data, metadata, cap_path):
                     print(f"anchor PC={pc:08X} file={start:06X} delta={pc-start:08X} capture={base:08X}+{len(body):X} executed_pcs={len(record.get('executed_pcs', []))}")
 
 
+def native_routes(image):
+    """Static command/collision/continuation linkage, pinned to verified USA code.
+
+    Fighter ID is control-4, NOT an archive index or an anatomical/move name.
+    A table target proves a possible path, never that it occurred in a match.
+    """
+    expected = '001adcdc2e129d3bd715c29b64e393fa8c2901a7ef39c2347874b321aae6b9dd'
+    if image.base != 0x8003DFA0 or sha(image.data) != expected:
+        raise ValueError('Native route semantics require the verified USA STEP40')
+
+    def cases(table, first, count, targets):
+        return [{'fighter_id': first+i, **targets[target]}
+                for i in range(count)
+                if (target := image.word(table+i*4)) in targets]
+
+    command_specs = {
+        0x25: (0x800607A0, 0x8003EE54, 0, 16, {
+            0x800607E0: {'requires_flags_any': 0x60, 'conditional_actions': [
+                {'flags_all': 0x20, 'action': 0x98},
+                {'flags_none': 0x20, 'flags_all': 0x40, 'action': 0xAA}]}}),
+        0x28: (0x80060930, 0x8003EEDC, 1, 16, {
+            0x80060974: {'action': 0x98}, 0x80060988: {'action': 0x9B},
+            0x8006099C: {'action': 0x9C}}),
+        0x29: (0x800609C0, 0x8003EF1C, 1, 15, {
+            0x80060A48: {'action': 0x97}, 0x80060A5C: {'action': 0x9C},
+            0x80060A70: {'action': 0x98, 'requires_flags_any': 0x60,
+                         'sets_flags': 0x200},
+            0x80060AC8: {'action': 0x9E}, 0x80060ADC: {'action': 0x99}}),
+        0x2B: (0x80060BA4, 0x8003EF94, 3, 14, {
+            0x80060BE8: {'action': 0x98}, 0x80060BFC: {'action': 0x97},
+            0x80060C10: {'action': 0x9D}}),
+        0x2C: (0x80060C34, None, 0, 0, {
+            2: {'action': 0x96}, 8: {'action': 0x98},
+            15: {'action': 0x96}, 17: {'action': 0x98}}),
+    }
+    commands = []
+    for row in range(34):
+        address = 0x8006EDC8+row*0x24
+        command = image.word(address+4) >> 16
+        if command not in command_specs:
+            continue
+        handler, table, first, count, targets = command_specs[command]
+        # The dispatcher remaps command IDs >=34 by subtracting31.
+        if image.word(0x8006ED04+(command-31)*4) != handler:
+            raise ValueError('Native route dispatch disagrees with command table')
+        steps = []
+        for i in range(7):
+            word = image.word(address+8+i*4)
+            if not word:
+                break
+            steps.append({'buttons_internal': word & 0xFFFF,
+                          'encoded_window': word >> 16})
+        commands.append({'command': command, 'handler': hex(handler),
+                         'command_row': row, 'steps': steps,
+                         'fighter_cases': (cases(table, first, count, targets) if table else
+                                           [{'fighter_id': i, **v} for i, v in targets.items()]),
+                         'entry_guard': ('flags20/40 reject except fighter6'
+                                         if command == 0x29 else None)})
+
+    confirmations = []
+    for action, target, table, count, writers in (
+            (0x98, 0x80062F48, 0x8003F24C, 18,
+             {0x80062FC8: 0x80062FF4, 0x80063008: 0x80063030}),
+            (0xAA, 0x800631BC, 0x8003F2DC, 17,
+             {0x800631FC: 0x80063228})):
+        if image.word(0x8003F004+(action-0x62)*4) != target:
+            raise ValueError('Collision action dispatch mismatch')
+        confirmations.append({'action': action, 'collision_selector': hex(target),
+                              'field': 'attacker.control+4', 'set_mask': 0x80,
+                              'fighter_cases': cases(table, 0, count,
+                                  {pc: {'store_pc': hex(store)} for pc, store in writers.items()})})
+    supported = [0, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16]
+    return {'source_sha256': expected, 'static_only': True,
+            'command_routes': commands, 'collision_confirmations': confirmations,
+            'continuation': {
+                'candidate_actions': [0x98, 0xAA], 'fighter_ids': supported,
+                'candidate_storage': 'caller.sp+0x48',
+                'field': 'control+4', 'selector_pc': '0x800576BC',
+                'final_action_store_pc': '0x80057F94',
+                'outcomes': [
+                    {'flags_all': 0x280, 'action': 0x9B, 'clear_mask': 0x280},
+                    {'flags_all': 0x80, 'flags_none': 0x200,
+                     'action': 0x99, 'clear_mask': 0x80},
+                    {'flags_none': 0x80, 'action': 0x9A, 'clear_mask': 0x200}],
+                'requests_native_action_change': True},
+            'limits': ['Fighter IDs are not mapped to character names/archive order.',
+                       'Collision branch prerequisites before 0x80062AB4 still apply.',
+                       'Static paths are not observed hits or measured frame data.',
+                       'The selector consumes a stack candidate, not a sampled action transition.',
+                       'No new aerial move or timing change is implemented by this report.']}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--disc", type=Path, default=ROOT / "disc/Dragon Ball GT - Final Bout (USA).bin")
     parser.add_argument("--captures", type=Path, default=ROOT / "build-release/vault/overlay_captures.json")
-    parser.add_argument("command", choices=("inventory", "disasm", "xrefs", "calls", "pointers", "words", "fieldrefs", "commands"))
+    parser.add_argument("command", choices=("inventory", "files", "immediates", "disasm", "xrefs", "calls", "pointers", "words", "fieldrefs", "commands", "routes"))
     parser.add_argument("addresses", nargs="*", type=lambda s: int(s, 0))
     parser.add_argument("--size", type=lambda s: int(s, 0), default=4)
     args = parser.parse_args()
+    if args.command == "files":
+        iso = Iso(args.disc)
+        for name, lba, size in iso.files():
+            print(f"{name} lba={lba} size={size}")
+        return
     data, metadata = step40(args.disc)
     if args.command == "inventory":
         inventory(data, metadata, args.captures)
         return
     image = BattleImage(data, args.captures)
+    if args.command == 'routes':
+        print(json.dumps(native_routes(image), indent=2))
+        return
     print(f"STEP40 SHA256 {sha(data)}, verified base {image.base:08X}, matching executed PCs {len(image.executed)}")
     if args.command == "disasm":
         image.disasm(*args.addresses)
@@ -287,6 +387,11 @@ def main():
         for address in args.addresses:
             for pc in range(address, address + args.size, 16):
                 print(f"{pc:08X} +{pc-image.base:06X}: " + " ".join(f"{image.word(a):08X}" for a in range(pc, min(pc+16, address+args.size), 4)))
+    elif args.command == "immediates":
+        for pc in range(TEXT_START, TEXT_END, 4):
+            word = image.word(pc)
+            if word >> 26 in (9, 10, 11, 12, 13) and (word & 0xffff) in args.addresses:
+                print(f"{'E' if pc in image.executed else '-'} {pc:08X} {decode(pc, word)}")
     elif args.command == "fieldrefs":
         for pc in range(TEXT_START, TEXT_END, 4):
             word = image.word(pc)

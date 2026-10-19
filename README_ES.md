@@ -23,7 +23,7 @@ renderizado. No es un emulador tradicional.
 | **Region** | USA |
 | **Serial** | SLUS-00493 |
 | **Genero** | Lucha 3D |
-| **Version** | v0.1.1 |
+| **Version** | v0.2.0 |
 
 Copyright (c) 2026 **NovaPowers**. Licencia MIT (ver `LICENSE`).
 
@@ -36,8 +36,8 @@ de tu **copia legal** de *Dragon Ball GT: Final Bout*.
 
 - El proyecto espera la version USA `SLUS-00493`.
 - Consulta `baserom.md` para el tamano, serial, volumen y checksums esperados.
-- Las imagenes de disco, el BIOS retail y el codigo generado no se incluyen.
-- El codigo recompilado se genera localmente a partir de tus propios archivos.
+- No se incluyen imagenes de disco, BIOS retail ni fuentes C generados.
+- La release incluye ejecutables y bibliotecas nativas; tu aportas el disco.
 
 Proyecto no oficial, sin animo de lucro, de investigacion y preservacion. No esta
 afiliado ni respaldado por Bandai, Shueisha, Toei Animation ni otros titulares
@@ -47,16 +47,29 @@ de derechos de Dragon Ball.
 
 ## Para Jugar
 
-1. Descarga `dbfb-0.1.1-setup-host-win64.zip` desde
-   [Releases](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/latest).
+1. Descarga `dbfb-0.2.0-windows-x64.zip` desde
+   [release experimental v0.2.0](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.0).
 2. Descomprime el paquete en una carpeta de Windows.
 3. Aporta tu copia legal siguiendo la identidad descrita en `baserom.md`.
 4. Ejecuta `DBFinalBout_Recompiled.exe` o abre el launcher incluido.
 5. Deja el widescreen desactivado para una presentacion 4:3 fiel, o activa
    `psx.enhancement.widescreen` para 16:9/adaptive.
 
-El paquete setup-host puede solicitar los datos del juego durante la primera
-configuracion. No descargues BIOS ni imagenes de disco desde este repositorio.
+El paquete ya esta compilado. Selecciona tu disco al abrirlo; no hace falta
+compilar. Incluye OpenBIOS con su licencia MIT.
+
+### Combate renovado (opcional, offline)
+
+En **Mods**, activa **Combate renovado** para usar el perfil integrado.
+**Todos los personajes** desbloquea los 17 luchadores de forma independiente.
+Ambos vienen desactivados. El perfil mejora entradas, remates aereos nativos,
+movilidad, defensa, hit-stop, ki y abre algo el encuadre. La transicion nueva
+del brazo se limita al registro de animacion 0 verificado. Sigue siendo
+experimental: en vuelo puede quedar un luchador fuera del plano original;
+las fichas medidas y el balance por dificultad no son exhaustivos. Consulta
+las notas de la version.
+Las pruebas del modo original tambien detectaron un cierre intermitente por
+watchdog cuya causa sigue abierta. v0.2.0 es una pre-release experimental.
 
 ### Configuracion Recomendada
 
