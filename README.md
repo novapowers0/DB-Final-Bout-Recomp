@@ -23,7 +23,7 @@ This is not a traditional emulator.
 | **Region** | USA |
 | **Serial** | SLUS-00493 |
 | **Genre** | 3D fighting |
-| **Version** | v0.2.0 |
+| **Version** | v0.2.1 |
 
 Copyright (c) 2026 **NovaPowers**. MIT License (see `LICENSE`).
 
@@ -47,8 +47,8 @@ Dragon Ball rightsholder.
 
 ## Playing
 
-1. Download `dbfb-0.2.0-windows-x64.zip` from
-   [v0.2.0 experimental release](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.0).
+1. Download `dbfb-0.2.1-windows-x64.zip` from
+   [v0.2.1 experimental release](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.1).
 2. Extract the package to a Windows folder.
 3. Provide your legally owned copy following the identity in `baserom.md`.
 4. Run `DBFinalBout_Recompiled.exe` or open the included launcher.
@@ -67,8 +67,9 @@ defense, hit-stop, ki changes and a slightly wider camera. The new arm recovery
 transition is limited to verified animation record 0. This remains experimental:
 flight can still leave a fighter outside the original camera's view; measured
 move cards and difficulty balance are not exhaustive. See the release notes.
-Original-mode package tests also exposed an intermittent watchdog exit; the
-cause remains open. v0.2.0 is an experimental pre-release.
+Original-mode package tests also exposed an intermittent watchdog exit. v0.2.1
+fixes a host-side wait on already-finished autocompile workers, but the cause
+of every intermittent exit remains open. v0.2.1 is an experimental pre-release.
 
 ### Recommended Settings
 
@@ -172,6 +173,28 @@ committed. Build artifacts and game images are ignored by Git.
 ---
 
 ## Version History
+
+### v0.2.1
+
+Maintenance pre-release: fixed a host-side VBlank wait on autocompile workers
+that had published `DONE` but had not fully exited, added a controlled
+regression for that interleaving, and added passive watchdog gap/section
+diagnostics. 121 project tests passed, both runtimes built, the offline check
+passed, and an isolated 5/3/2-combat matrix passed. The intermittent original
+-mode watchdog cause remains open; this release does not claim universal
+stability.
+
+Framework pins: `psxrecomp` `a51c9aa7` (`rework-master`).
+
+### v0.2.0
+
+Experimental renewed-combat release: integrated optional combat profile,
+verified arm-recovery transition, wider camera, roster unlock, opt-in Windows
+sampling, and the compiled Windows package. Two original-mode package tests
+exited through the watchdog; that intermittent cause remained open.
+
+Framework pins: `psxrecomp` `835f1902` (`rework-master`), `recomp-ui`
+`0546fbcb`, and nested `recomp-net` `55269a62`.
 
 ### v0.1.1
 

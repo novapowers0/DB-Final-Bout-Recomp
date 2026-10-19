@@ -23,7 +23,7 @@ renderizado. No es un emulador tradicional.
 | **Region** | USA |
 | **Serial** | SLUS-00493 |
 | **Genero** | Lucha 3D |
-| **Version** | v0.2.0 |
+| **Version** | v0.2.1 |
 
 Copyright (c) 2026 **NovaPowers**. Licencia MIT (ver `LICENSE`).
 
@@ -47,8 +47,8 @@ de derechos de Dragon Ball.
 
 ## Para Jugar
 
-1. Descarga `dbfb-0.2.0-windows-x64.zip` desde
-   [release experimental v0.2.0](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.0).
+1. Descarga `dbfb-0.2.1-windows-x64.zip` desde
+   [release experimental v0.2.1](https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.1).
 2. Descomprime el paquete en una carpeta de Windows.
 3. Aporta tu copia legal siguiendo la identidad descrita en `baserom.md`.
 4. Ejecuta `DBFinalBout_Recompiled.exe` o abre el launcher incluido.
@@ -69,7 +69,9 @@ experimental: en vuelo puede quedar un luchador fuera del plano original;
 las fichas medidas y el balance por dificultad no son exhaustivos. Consulta
 las notas de la version.
 Las pruebas del modo original tambien detectaron un cierre intermitente por
-watchdog cuya causa sigue abierta. v0.2.0 es una pre-release experimental.
+watchdog. v0.2.1 corrige una espera del host sobre trabajadores de
+autocompilacion ya finalizados, pero la causa de todos los cierres sigue
+abierta. v0.2.1 es una pre-release experimental.
 
 ### Configuracion Recomendada
 
@@ -174,6 +176,29 @@ por Git.
 ---
 
 ## Historial de Versiones
+
+### v0.2.1
+
+Pre-release de mantenimiento: se corrigio una espera del hilo del juego en
+VBlank sobre trabajadores de autocompilacion que habian publicado `DONE` sin
+terminar, se anadio una regresion controlada de esa carrera y diagnosticos
+pasivos del intervalo y las secciones del watchdog. Pasaron 121 pruebas, los
+dos runtimes compilaron, la verificacion offline paso y una matriz aislada de
+5/3/2 combates paso. La causa de los cierres intermitentes del modo original
+sigue abierta; esta release no declara estabilidad universal.
+
+Pins de frameworks: `psxrecomp` `a51c9aa7` (`rework-master`).
+
+### v0.2.0
+
+Release experimental de combate renovado: perfil opcional integrado,
+transicion de recuperacion del brazo verificada, camara algo mas abierta,
+desbloqueo de personajes, muestreo Windows opt-in y paquete Windows compilado.
+Dos pruebas del paquete en modo original terminaron por watchdog; esa causa
+intermitente siguio abierta.
+
+Pins de frameworks: `psxrecomp` `835f1902` (`rework-master`), `recomp-ui`
+`0546fbcb` y el submodulo anidado `recomp-net` `55269a62`.
 
 ### v0.1.1
 
