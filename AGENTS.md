@@ -417,9 +417,10 @@ offline PASS; matriz final original600s/5combates, estándar300s/3, PGXP300s/2,
 1,05s CPU, sampler0, antes de medir secciones. Ver `R0_ESTABILIDAD.md`; no atribuir
 todos los cierres a R0-B. Secciones/CPU/ciclos en reporte; watchdog intacto.
 `tools/combat_stability.py` aísla cada modo y valida el runtime, con `--build`
-opcional para el candidato local. La v0.2.0 publicada NO contiene esta revisión.
-Fuentes del submódulo modificadas sobre835f1902; no representar el pin limpio
-como si incluyera los cambios locales. No tocar `github/` ajeno.
+opcional para el candidato local. **v0.2.1 publicada** (pre-release, commit
+`7bfb3a1`, tag `v0.2.1`) incluye R0-B; pin limpio `a51c9aa7`. Matriz del ZIP
+3/3 PASS. R0-C sigue abierto: no atribuir todos los cierres a R0-B ni declarar
+estabilidad universal. No tocar `github/` ajeno.
 
 **Historial de publicación §9:** revisión visual del agente completada (transición real
 2896–2907, cámara ON/OFF con un par de estado equivalente y 26 imágenes

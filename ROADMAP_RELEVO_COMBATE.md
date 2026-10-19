@@ -1,11 +1,12 @@
 # Roadmap y relevo del combate — actualización 2026-10-19
 
-**Estado vigente: §10 y `R0_ESTABILIDAD.md`.** R0-B corregido localmente:
-el hilo del juego ya no espera a trabajadores aún vivos tras `DONE`.
-Reproducción antes/después y 121tests OK; matriz final 3/3 PASS, 10combates.
-R0-C conserva tres cierres sin atribución definitiva; R0 global sigue abierto.
-R7 está cerrado como entrega experimental v0.2.0, que no contiene este parche
-local posterior. El historial inferior conserva sus resultados originales.
+**Estado vigente: §11, §10 y `R0_ESTABILIDAD.md`.** R0-B corregido y publicado
+en **v0.2.1**: el hilo del juego ya no espera a trabajadores aún vivos tras
+`DONE`. Reproducción antes/después, 121tests OK y matriz del ZIP 3/3 PASS,
+10combates. R0-C conserva tres cierres sin atribución definitiva; R0 global
+sigue abierto. R7 permanece cerrado como entrega experimental; v0.2.1 es una
+pre-release de mantenimiento. El historial inferior conserva sus resultados
+originales.
 
 Documento operativo para **cualquier modelo** que continúe. Complementa las
 reglas de `AGENTS.md` y `psxrecomp/CLAUDE.md`; sustituye el estado histórico del
@@ -778,7 +779,7 @@ en vuelo y exclusión de todas las tomas internas; R5 muestras aéreas/bloqueo;
 R6 balance cuantitativo más amplio. Estos son límites declarados de v0.2.0,
 no comprobaciones pendientes que se encarguen al usuario antes de publicar.
 
-## 10. Seguimiento R0 — espera bloqueante corregida localmente
+## 10. Seguimiento R0 — espera bloqueante corregida y publicada en v0.2.1
 
 **Estado vigente tras la publicación.** Encargo: investigar R0 y dejar el estado
 pulido y bien establecido. Registro completo y comandos en
@@ -816,6 +817,25 @@ pulido y bien establecido. Registro completo y comandos en
   operación, reproducir y corregir. El rescan del proveedor conserva costes
   medidos de1,1–1,4s; no fue eliminado por la corrección de las esperas.
 
-La revisión está en fuentes y build locales; **v0.2.0 publicada no cambia**.
-R7 continúa cerrado como entrega experimental. R0 global no se marca cerrado
-por haber corregido R0-B ni por una matriz sin fallos.
+La revisión se publicó como **v0.2.1**; v0.2.0 permanece inmutable. R7
+continúa cerrado como entrega experimental. R0 global no se marca cerrado por
+haber corregido R0-B ni por una matriz sin fallos.
+
+## 11. Publicación v0.2.1 — mantenimiento experimental
+
+- **Núcleo:** `a51c9aa7` (`runtime: avoid blocking VBlank on finishing
+  autocompile workers`), subido a `nova/rework-master`.
+- **Repo principal:** `9b60a4d` (evidencia R0, herramienta y pin) y `7bfb3a1`
+  (VERSION/notas/README). Tag anotado `v0.2.1`; master remoto `7bfb3a1`.
+- **Build:** `nightly-1382-ga51c9aa7`, VERSION 0.2.1.
+- **Paquete:** `dbfb-0.2.1-windows-x64.zip`, 2.749 archivos, 83.484.971 bytes,
+  SHA256 `b9c67dea5092e5668930508fb88cab1de1ea1e6f856993b2850135f65054a20e`;
+  `.sha256` adjunto. Assets `uploaded` y digest remoto = local.
+- **Prueba del paquete:** matriz sin `--build` 3/3 PASS: original600s/5combates,
+  renovado300s/3, PGXP300s/2; pausa/estados/locomoción/cierre0/autocompile/
+  sampler0. Evidencia privada `dbfb-021-release-matrix-20261019`.
+- **Publicación:** pre-release (no latest; v0.1.1 sigue estable):
+  https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.1
+- **Límite:** R0-C no se cierra. La corrección es de clase y está probada en su
+  reproducción controlada, pero no explica por sí sola los tres cierres
+  históricos. Los costes de `provider_poll` (1,1–1,4 s) siguen documentados.

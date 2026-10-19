@@ -1,5 +1,30 @@
 # DBFinalBout Recomp — Session Summary
 
+## 2026-10-19: v0.2.1 publicada y verificada; R0-C sigue abierto
+
+- Núcleo `a51c9aa7` (`runtime: avoid blocking VBlank on finishing autocompile
+  workers`) subido a `nova/rework-master`; pin actualizado. Commit principal
+  `9b60a4d` (evidencia R0, herramienta y pin) y `7bfb3a1` (release 0.2.1).
+  Tag anotado `v0.2.1` (objeto `fc8d0bc`), master remoto `7bfb3a1`.
+- Build limpio `nightly-1382-ga51c9aa7`, VERSION 0.2.1, notas y README actualizados.
+- Paquete `dbfb-0.2.1-windows-x64.zip`: **2.749 archivos**, 83.484.971 bytes,
+  SHA256 `b9c67dea5092e5668930508fb88cab1de1ea1e6f856993b2850135f65054a20e`.
+  Checksum `.sha256` publicado (digest `34558a36…`). Assets en estado `uploaded`
+  y digest remoto = local.
+- Pre-release publicada (no latest; v0.1.1 sigue como última estable):
+  https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.1
+- **Matriz del ZIP publicado, sin `--build`:** original600s/5combates,
+  renovado300s/3, PGXP300s/2; **3/3 PASS**, original inerte, pausa/estados,
+  locomoción, cierre0, autocompile correcto y sampler0. Evidencia privada
+  `dbfb-021-release-matrix-20261019`.
+- La sesión original sana mostró gap máximo de1,36s pared/0µs CPU y
+  `provider_poll`1,14s; el renovado mostró `debug_poll`1,18s. Todos por debajo
+  del watchdog4s; no se relajó ningún detector.
+- R0-C **no cerrado**: la causa de los cierres intermitentes originales sigue
+  sin demostrar. La publicación de v0.2.1 no es una declaración de estabilidad
+  universal. R1–R6 conservan sus límites declarados.
+- `github/` ajeno preservado y sin trackear.
+
 ## 2026-10-19: R0 investigado; espera de trabajadores corregida y probada localmente
 
 - Estado preciso en `R0_ESTABILIDAD.md` y roadmap §10. R0-A (sampler) ya estaba
@@ -28,11 +53,9 @@
   fallo anterior. Esos PASS previos muestran por qué no bastan para cerrar R0-C.
   WPR perdió eventos (no prueba causal); xperf reducido sin avisos de pérdida,
   pero su sesión no falló. Evidencia privada en `%TEMP%/opencode/`.
-- Núcleo sobre835f1902 con cambios locales dirty; binarios finalesSHA256:
-  normal `13d093c1b1554b52bbfc0b8d4068e60c2c4f642158a7ef414041f26750d49e4e`,
-  PGXP `49b4bf4199140f0ec031761dfafac5e2dc1e85e3b28ac73ef39446593f8c8d26`.
-  La v0.2.0 pública conserva sus assets; no incorpora este parche. Sin nueva
-  publicación, commit ni push en esta continuación. `github/` ajeno preservado.
+- Núcleo sobre835f1902 con cambios locales dirty en aquel momento; binarios de
+  esa revisión SHA256 normal `13d093c1…`, PGXP `49b4bf41…`. Esta revisión se
+  publicó después como v0.2.1 (ver entrada superior). `github/` ajeno preservado.
 
 ## 2026-10-19: visual revisado por el agente, R7 y publicación experimental 0.2.0
 

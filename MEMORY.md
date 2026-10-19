@@ -162,8 +162,13 @@ inicial compila y pasa tests, pero **no es el rediseño definitivo**.
   sampler0, antes de los cronómetros por sección. No adjudicar automáticamente
   los tres cierres a R0-B. Reporte conCPU/ciclos y ocho secciones; watchdog intacto.
   `tools/combat_stability.py` crea copias privadas por modo y valida runtime;
-  `--build` prueba candidato local. Núcleo835f1902-dirty, sin nuevo commit/push;
-  el ZIP público0.2.0 NO lleva esta corrección. Ver comandos y hashes en documento.
+  `--build` prueba candidato local. Núcleo `a51c9aa7` commiteado y subido a
+  `nova/rework-master`; pin actualizado. **v0.2.1 publicada** (commit `7bfb3a1`,
+  tag `v0.2.1`, pre-release, no latest), ZIP `dbfb-0.2.1-windows-x64.zip`
+  83.484.971 bytes / 2.749 archivos / SHA256 `b9c67dea…a20e`. Build limpio
+  `nightly-1382-ga51c9aa7`. Matriz del ZIP 3/3 PASS (5/3/2 combates). URL:
+  https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.1
+  R0-C sigue abierto; la publicación no declara estabilidad universal.
 
 - **Historial §9, 2026-10-19:** R7 cerrado para la entrega experimental 0.2.0;
   visual comprobado por el agente (render real del settle, 26 fotogramas de

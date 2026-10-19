@@ -1,19 +1,19 @@
 # R0 — estabilidad: estado y comprobación reproducible
 
-**Estado vigente: 2026-10-19, después de publicar v0.2.0.**
+**Estado vigente: 2026-10-19, después de publicar v0.2.1.**
 
-Hay una corrección local probada de una espera bloqueante del núcleo. **No hay
-evidencia suficiente para atribuirle todos los cierres históricos ni para cerrar
-R0 globalmente.** Este documento sustituye las referencias imprecisas a «R0
-pendiente». El registro de la release sigue en el roadmap §9; esta continuación
-está en §10.
+Hay una corrección publicada y probada de una espera bloqueante del núcleo.
+**No hay evidencia suficiente para atribuirle todos los cierres históricos ni
+para cerrar R0 globalmente.** Este documento sustituye las referencias
+imprecisas a «R0 pendiente». El registro de la release v0.2.0 está en el
+roadmap §9; el mecanismo y su publicación están en §10 y §11.
 
 ## Qué está corregido y qué no
 
 | Caso | Estado | Evidencia |
 |---|---|---|
 | R0-A: el muestreador suspendía el hilo del juego por defecto | Corregido en el núcleo publicado `835f1902` y en v0.2.0 | Opt-in exacto `PSX_HOST_SAMPLER_SUSPEND=1`; pruebas de política |
-| R0-B: el mantenimiento del compilador esperaba a trabajadores aún vivos | **Corregido en la compilación local posterior a v0.2.0** | Carrera reproducida con eventos; la prueba se bloqueaba antes del cambio y pasa después |
+| R0-B: el mantenimiento del compilador esperaba a trabajadores aún vivos | **Corregido y publicado en v0.2.1** | Carrera reproducida con eventos; la prueba se bloqueaba antes del cambio y pasa después |
 | R0-C: cierres por watchdog con sampler=0, frames 9781/17850/7236 | **Abierto en su atribución causal** | Tres fallos preservados; el último tiene medición de tiempo de pared y CPU; falta capturarlo con atribución por sección |
 
 ## R0-B: corrección de clase, sin cambiar el watchdog
@@ -82,15 +82,15 @@ Dos capturas WPR generales perdieron eventos y **no se usan como prueba causal**
 La captura CPU reducida con xperf se completó sin avisos de pérdida, pero esa
 sesión no reprodujo el cierre. Todo permanece privado en `%TEMP%/opencode/`.
 
-## Verificación de la revisión final local
+## Verificación de v0.2.1
 
 ```powershell
 # En PowerShell, conservar las comillas del argumento de versión.
-cmake -S . -B build-release '-DPSX_GAME_VERSION=0.2.0'
+cmake -S . -B build-release '-DPSX_GAME_VERSION=0.2.1'
 cmake --build build-release -j 2
 python -B -m unittest discover -s tools/tests -p "test_*.py"
 python -B tools/verify_offline.py
-python -B tools/combat_stability.py --build build-release --original-seconds 600 --seconds 300 --out "$env:TEMP\opencode\NUEVA-CARPETA"
+python -B tools/combat_stability.py --archive "dist\dbfb-0.2.1-windows-x64.zip" --original-seconds 600 --seconds 300 --out "$env:TEMP\opencode\NUEVA-CARPETA"
 ```
 
 Resultados ejecutados: **121 tests OK**, 36 grupos C de combate y matriz de
@@ -98,8 +98,8 @@ Resultados ejecutados: **121 tests OK**, 36 grupos C de combate y matriz de
 `cg18_1b6950cb_gc164a1e9a_f0`. Los ocho rechazos kernel históricos permanecen
 excluidos; no se afirma que todos los overlays compilen.
 
-Matriz final `dbfb-r0-verified-final-20261019` (tras colocar la revalidación
-del heartbeat después de la contabilidad pasiva del sistema):
+Matriz ejecutada **desde el ZIP publicado**, sin `--build` ni sustituir
+binarios (`dbfb-021-release-matrix-20261019`):
 
 | Modo | Duración | Combates completos | Resultado |
 |---|---:|---:|---|
@@ -107,14 +107,17 @@ del heartbeat después de la contabilidad pasiva del sistema):
 | Combate renovado | 300 s | 3 | PASS |
 | PGXP + combate renovado | 300 s | 2 | PASS |
 
-Los tres confirmaron pausa/reanudación, guardar/cargar, autocompilación correcta,
-salida `tcp_quit`/0 y sampler=0. SHA256 de los ejecutables probados:
+Los tres confirmaron pausa/reanudación, guardar/cargar, locomoción propia,
+autocompilación correcta, salida `tcp_quit`/0 y sampler=0. Identidad:
+`nightly-1382-ga51c9aa7`. SHA256 de los ejecutables del paquete:
 
-- Normal: `13d093c1b1554b52bbfc0b8d4068e60c2c4f642158a7ef414041f26750d49e4e`.
-- PGXP: `49b4bf4199140f0ec031761dfafac5e2dc1e85e3b28ac73ef39446593f8c8d26`.
+- Normal: `21feae7ce85ad4c6ce322b9a3d7b96a34e3b90ab5436b4e8defb24c8c7d067c8`.
+- PGXP: `46f4825327b6d7a71b52f84e3988d069213b2c26b02d1b75bc6b7193eedda0d6`.
 
-La matriz inmediatamente anterior `dbfb-r0-nonblocking-final-20261019` también
-pasó con 5/3/2 combates; se conserva como evidencia de aquella revisión.
+Paquete `dbfb-0.2.1-windows-x64.zip`: 2.749 archivos, 83.484.971 bytes,
+SHA256 `b9c67dea5092e5668930508fb88cab1de1ea1e6f856993b2850135f65054a20e`.
+La matriz previa `dbfb-r0-verified-final-20261019` también pasó con 5/3/2
+combates y se conserva como evidencia de la revisión local.
 
 Se conservan además las sesiones anteriores al cambio: nueve sesiones originales
 de 600 s completaron **48 combates**, y hubo también el fallo instrumentado
@@ -148,8 +151,11 @@ de la matriz de juego. Si aparece `provider_poll`, separar espera de trabajadore
 commit de imagen y rescan; no confundirlos. No aumentar tiempos ni desactivar
 detectores para obtener PASS.
 
-**Distribución:** esta revisión es local, basada en `835f1902` con cambios
-identificados como `dirty`. El ZIP y tag públicos **v0.2.0 no incorporan R0-B**.
-Antes de una nueva publicación: commit del núcleo y push, pins, build con
-identidad limpia, paquete nuevo y prueba de ese paquete. La matriz con `--build`
-es una prueba del candidato local, no del ZIP publicado sin modificar.
+**Distribución:** R0-B está **publicado en v0.2.1** (pre-release). Núcleo
+`a51c9aa7` en `nova/rework-master`, pin limpio, build `nightly-1382-ga51c9aa7`,
+paquete probado sin sustituir binarios. Commit `7bfb3a1`, tag `v0.2.1`.
+La release v0.2.0 no incluía la corrección y permanece inmutable.
+https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.1
+
+R0-C sigue abierto: publicar R0-B no cierra la investigación de los cierres
+intermitentes ni autoriza a declarar estabilidad universal.

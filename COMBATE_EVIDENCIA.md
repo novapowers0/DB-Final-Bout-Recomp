@@ -2,12 +2,12 @@
 
 ## Estado vigente — R0 posterior a release (2026-10-19)
 
-Ver `R0_ESTABILIDAD.md` y roadmap §10. Espera bloqueante de trabajadores tras
-DONE corregida **localmente**, reproducción controlada antes/después.121tests,
-builds y offline PASS; matriz final original5/estándar3/PGXP2 combates,3/3 PASS,
-pausa/estados y cierre0. Watchdog intacto. R0-C conserva tres fallos sin atribución
-definitiva; no cerrar R0 global. La distribución publicada0.2.0 no lleva el
-parche local. El historial visual/R7 siguiente sigue siendo válido.
+Ver `R0_ESTABILIDAD.md` y roadmap §10/§11. Espera bloqueante de trabajadores
+tras DONE corregida, publicada en **v0.2.1** y probada desde el ZIP con
+reproducción controlada antes/después.121tests, builds y offline PASS; matriz
+original5/estándar3/PGXP2 combates,3/3 PASS, pausa/estados y cierre0. Watchdog
+intacto. R0-C conserva tres fallos sin atribución definitiva; no cerrar R0
+global. El historial visual/R7 siguiente sigue siendo válido.
 
 ## Historial — revisión visual y R7 (2026-10-19)
 

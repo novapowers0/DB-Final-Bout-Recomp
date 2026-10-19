@@ -168,7 +168,7 @@ por Git.
 - `ANALISIS_CRASHES.md`: investigacion de freezes y overlays.
 - `PLAN_SOLUCION_CRASH_Y_COMBATE.md`: estado actual y pasos de validacion del
   fix RI de la transicion a combate.
-- `RELEASE_NOTES_v0.1.1.md`: cambios y estado de validacion de esta release.
+- `RELEASE_NOTES_v0.2.1.md`: cambios y estado de validacion de esta release.
 - `SESSION_ANALYSIS.md`: flujo para capturar y analizar una sesion.
 - `summary.md`: historial detallado de decisiones y validaciones.
 - `tools/verify_offline.py`: comprobacion reproducible sin lanzar el juego.

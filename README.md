@@ -165,7 +165,7 @@ committed. Build artifacts and game images are ignored by Git.
 - `ANALISIS_CRASHES.md`: freeze and overlay investigation.
 - `PLAN_SOLUCION_CRASH_Y_COMBATE.md`: current status and validation steps for
   the combat-transition RI fix.
-- `RELEASE_NOTES_v0.1.1.md`: changes and known validation status for this release.
+- `RELEASE_NOTES_v0.2.1.md`: changes and known validation status for this release.
 - `SESSION_ANALYSIS.md`: session capture and analysis workflow.
 - `summary.md`: detailed decision and validation history.
 - `tools/verify_offline.py`: reproducible validation without launching the game.
