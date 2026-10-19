@@ -26,6 +26,11 @@
   PGXP 180 s/1; **3/3 PASS**, pausa/estados, salida 0, sampler=0 y autocompile
   correcto. Los fallos previos siguen registrados. ZIP 83.480.650 bytes,
   SHA256 `c1e17b089f3d5868c1970575b50344b74a576060b73022466b6bb1f2aabcfb6d`.
+- **Publicación completada:** commit `285cb7f` subido a master; tag y
+  pre-release `v0.2.0` publicados. ZIP y checksum en estado `uploaded`, digest
+  remoto idéntico al local. URL:
+  https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.0
+  La release estable `v0.1.1` se conserva. Solo queda ajeno sin añadir `github/`.
 
 ## 2026-10-19 (segunda tanda): R3 integrado y probado; R4 implementado; R5/R6 medidos; R1 cerrado
 

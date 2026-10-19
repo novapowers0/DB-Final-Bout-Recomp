@@ -759,8 +759,11 @@ no borra esos fallos. Se publica **pre-release experimental**, no release establ
   final anterior: 3/3 sesiones PASS. Núcleo sin marca dirty `835f1902`;
   sampler=0 y autocompile no degradado en las tres. Cargas máximas
   65067/1805/2382 µs (original/estándar/PGXP). Estos PASS no resuelven por sí
-  solos los dos watchdog anteriores. Publicación prevista en
+  solos los dos watchdog anteriores. **Publicada** como pre-release en
   `https://github.com/novapowers0/DB-Final-Bout-Recomp/releases/tag/v0.2.0`.
+  Commit/tag `285cb7f4003f347af9d06a3830b3688d2c5125d3`, push a `master`
+  confirmado; GitHub confirmó ambos assets `uploaded` y el SHA256 remoto
+  coincide con el ZIP local. `v0.1.1` se conserva como última estable.
 
 ### Cierre y seguimiento
 
